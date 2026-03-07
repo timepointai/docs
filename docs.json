@@ -10,10 +10,7 @@
   "colors": {
     "primary": "#d4a24e",
     "light": "#f0c05e",
-    "dark": "#a67c30",
-    "background": {
-      "dark": "#06080d"
-    }
+    "dark": "#a67c30"
   },
   "topbarLinks": [
     {
@@ -25,51 +22,53 @@
     "name": "GitHub",
     "url": "https://github.com/timepoint-ai"
   },
-  "anchors": [
-    {
-      "name": "API Reference",
-      "icon": "code",
-      "url": "api-reference"
-    },
-    {
-      "name": "GitHub",
-      "icon": "github",
-      "url": "https://github.com/timepoint-ai"
-    },
-    {
-      "name": "Community",
-      "icon": "twitter",
-      "url": "https://x.com/timepointai"
-    }
-  ],
-  "navigation": [
-    {
-      "group": "Getting Started",
-      "pages": ["introduction", "quickstart", "concepts"]
-    },
-    {
-      "group": "Products",
-      "pages": [
-        "products/flash",
-        "products/pro",
-        "products/clockchain",
-        "products/snag-bench",
-        "products/proteus",
-        "products/tdf"
-      ]
-    },
-    {
-      "group": "API Reference",
-      "pages": [
-        "api-reference/overview",
-        "api-reference/authentication",
-        "api-reference/clockchain",
-        "api-reference/flash",
-        "api-reference/pro",
-        "api-reference/mcp"
-      ]
-    }
-  ],
+  "navigation": {
+    "anchors": [
+      {
+        "name": "API Reference",
+        "icon": "code",
+        "url": "api-reference"
+      },
+      {
+        "name": "GitHub",
+        "icon": "github",
+        "url": "https://github.com/timepoint-ai"
+      },
+      {
+        "name": "Community",
+        "icon": "twitter",
+        "url": "https://x.com/timepointai"
+      }
+    ],
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": ["introduction", "quickstart", "concepts"]
+      },
+      {
+        "group": "Products",
+        "pages": [
+          "products/flash",
+          "products/pro",
+          "products/clockchain",
+          "products/snag-bench",
+          "products/proteus",
+          "products/tdf"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          "api-reference/overview",
+          "api-reference/authentication",
+          "api-reference/clockchain",
+          "api-reference/flash",
+          "api-reference/pro",
+          "api-reference/mcp"
+        ]
+      }
+    ]
+  },
   "footerSocials": {
     "x": "https://x.com/timepointai",
     "github": "https://github.com/timepoint-ai",
