@@ -3,10 +3,10 @@
   "theme": "mint",
   "name": "Timepoint AI",
   "logo": {
-    "dark": "/logo/logo-full.svg",
+    "dark": "/logo/logo-full-dark.svg",
     "light": "/logo/logo-full.svg"
   },
-  "favicon": "/logo/logo.svg",
+  "favicon": "/logo/favicon.svg",
   "colors": {
     "primary": "#d4a24e",
     "light": "#f0c05e",
