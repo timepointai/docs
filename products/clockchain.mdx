@@ -85,6 +85,10 @@ GET /api/v1/moments/{canonical-path}
 
 Each new event with causal edges tightens the Bayesian prior — fewer plausible things *could* have happened in the gaps — approaching asymptotic coverage of any historical period.
 
+{/* WCAG 1.1.1: accessible text description of flywheel diagram */}
+
+Flash scenes and Pro simulations feed into the Clockchain graph, which builds a stronger Bayesian prior. That prior drives the Expander (LLM) to discover gaps, which feeds back into more Flash and Pro renders.
+
 ```
 Flash scenes ──► Clockchain Graph ──► Stronger Prior
 Pro simulations ─┘        │               │

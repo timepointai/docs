@@ -2,6 +2,9 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Timepoint AI",
+  "metadata": {
+    "og:locale": "en_US"
+  },
   "logo": {
     "dark": "/logo/logo-full-dark.svg",
     "light": "/logo/logo-full.svg"

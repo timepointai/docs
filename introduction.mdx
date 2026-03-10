@@ -38,7 +38,7 @@ Timepoint is an open-source ecosystem of six integrated services that work toget
 
 Where **RAG** answers questions from what was written down, **SNAG** reasons about what people *did*, *felt*, and *caused*.
 
-| | RAG | SNAG |
+| Aspect | RAG | SNAG |
 |---|---|---|
 | **Input** | Document corpus | Scenario + entities + relationships |
 | **Structure** | Flat chunks | Directed causal graph |
@@ -46,6 +46,10 @@ Where **RAG** answers questions from what was written down, **SNAG** reasons abo
 | **Output** | Answer + citations | Simulation state + dialog + provenance |
 
 ## Architecture
+
+{/* WCAG 1.1.1: accessible text description of architecture diagram */}
+
+Flash receives user queries via timepointai.com and produces grounded scenes. It draws on Clockchain (causal graph), Pro (SNAG engine), and SNAG-Bench (benchmark). Clockchain and Pro share TDF (data format) as their interchange layer.
 
 ```
                         timepointai.com
