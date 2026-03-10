@@ -23,19 +23,20 @@ curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v
 
 ```json
 {
-  "total_nodes": 196,
-  "total_edges": 671,
-  "layer_counts": {"2": 196},
+  "total_nodes": 769,
+  "total_edges": 5602,
+  "layer_counts": {"2": 769},
   "edge_type_counts": {
     "causes": 73,
     "same_location": 42,
     "contemporaneous": 474,
     "thematic": 82
   },
-  "source_type_counts": {"historical": 196},
-  "date_range": {"min_year": -133, "max_year": 2019},
-  "avg_confidence": null,
-  "last_updated": "2026-03-07T04:35:49Z"
+  "source_type_counts": {"historical": 769},
+  "date_range": {"min_year": -700, "max_year": 2026},
+  "avg_confidence": 0.85,
+  "last_updated": "2026-03-10T00:00:00Z",
+  "nodes_with_images": 561
 }
 ```
 
@@ -74,10 +75,11 @@ curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/
       "year": 1969,
       "layer": 2,
       "figures": ["Neil Armstrong", "Buzz Aldrin"],
-      "tags": ["space", "nasa", "cold-war"]
+      "tags": ["space", "nasa", "cold-war"],
+      "image_url": "https://cdn.timepointai.com/scenes/apollo-11-moon-landing.jpg"
     }
   ],
-  "total": 196,
+  "total": 769,
   "limit": 5,
   "offset": 0
 }
@@ -103,6 +105,13 @@ These require `X-Service-Key` header:
 | `/today` | GET | Today in history |
 | `/generate` | POST | Generate new moment via Flash |
 | `/ingest/tdf` | POST | Ingest TDF record |
+
+## Interactive API Docs
+
+The Clockchain provides built-in interactive documentation:
+
+- **Swagger UI:** `/docs` — try endpoints directly in the browser
+- **ReDoc:** `/redoc` — readable reference documentation
 
 ### TDF Export
 

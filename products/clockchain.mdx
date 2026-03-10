@@ -5,7 +5,7 @@ description: "Persistent temporal causal graph — PostgreSQL-backed directed gr
 
 # Clockchain
 
-**Temporal causal graph for AI agents.** PostgreSQL-backed directed graph of historical moments — canonical spatiotemporal URLs, typed causal edges, autonomous expansion, and browse/search/discovery APIs.
+**Temporal causal graph for AI agents.** PostgreSQL-backed directed graph of historical moments — canonical spatiotemporal URLs, typed causal edges, autonomous expansion, and browse/search/discovery APIs. Currently holds **769 nodes** and **5,602 edges** spanning 700 BCE to 2026, with 73% image coverage and growing.
 
 <CardGroup cols={2}>
   <Card title="GitHub" icon="github" href="https://github.com/timepointai/timepoint-clockchain">
@@ -38,7 +38,7 @@ Two PostgreSQL tables: `nodes` (canonical spatiotemporal URLs as PKs) and `edges
 |-------|---------|--------|
 | 0 | URL path + event name | Auto-generated |
 | 1 | Metadata: figures, tags, description | Expander (LLM) |
-| 2 | Full Flash scene with dialog, characters, image | Flash renderer |
+| 2 | Full Flash scene with dialog, characters, image, CDN-hosted image_url | Flash renderer |
 
 ### Edge Types
 
