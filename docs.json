@@ -20,7 +20,7 @@
   ],
   "topbarCtaButton": {
     "name": "GitHub",
-    "url": "https://github.com/timepoint-ai"
+    "url": "https://github.com/timepointai"
   },
   "navigation": {
     "anchors": [
@@ -32,7 +32,7 @@
       {
         "name": "GitHub",
         "icon": "github",
-        "url": "https://github.com/timepoint-ai"
+        "url": "https://github.com/timepointai"
       },
       {
         "name": "Community",
@@ -71,7 +71,7 @@
   },
   "footerSocials": {
     "x": "https://x.com/timepointai",
-    "github": "https://github.com/timepoint-ai",
+    "github": "https://github.com/timepointai",
     "website": "https://timepointai.com"
   }
 }
