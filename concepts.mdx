@@ -11,6 +11,10 @@ A Timepoint is a verified, confidence-scored node in a temporal causal graph. It
 
 Every timepoint has a **canonical spatiotemporal URL** — 8 segments encoding *when* and *where*:
 
+{/* WCAG 1.1.1: accessible text description of URL structure */}
+
+The 8 segments are, from left to right: year (negative for BCE), month, day, time (24-hour), country, region, city, and slug.
+
 ```
 /-44/march/15/1030/italy/lazio/rome/assassination-of-julius-caesar
   │    │    │   │     │     │    │    └── slug
