@@ -24,7 +24,8 @@ No auth required. Returns service status and provider availability.
   "database": true,
   "providers": {
     "google": true,
-    "openrouter": true
+    "openrouter": true,
+    "stability": true
   }
 }
 ```
@@ -44,10 +45,18 @@ curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
 
 **Request Body:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `query` | string | Yes | Natural language description of the moment |
-| `generate_image` | boolean | No | Generate photorealistic image (default: false) |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | string | Yes | Historical moment description (3–500 chars) |
+| `generate_image` | boolean | No | Generate AI image (default: false) |
+| `preset` | string | No | Quality preset: `hyper`, `balanced` (default), `hd`, `gemini3` |
+| `text_model` | string | No | Text model ID — OpenRouter format (`org/model`) or Google native (`gemini-*`). Overrides preset. |
+| `image_model` | string | No | Image model ID — Stability AI (`stabilityai/*`), `pollinations`, or Google native. Overrides preset. |
+| `model_policy` | string | No | `"permissive"` for open-weight only, Google-free generation. |
+| `llm_params` | object | No | Fine-grained LLM hyperparameters (see below). |
+| `visibility` | string | No | `public` (default) or `private` |
+| `callback_url` | string | No | URL to POST results when generation completes (async only) |
+| `request_context` | object | No | Opaque context passed through to response |
 
 **Response:** Full scene with characters, dialog, atmosphere, relationships, image URL, confidence scores, and source citations. Output is TDF-compatible.
 
@@ -65,19 +74,102 @@ curl -N -X POST https://api.timepointai.com/api/v1/timepoints/generate/stream \
 Events are streamed as each agent in the pipeline completes:
 `Judge → Timeline → Grounding → Scene → Characters → Moment → Camera → Dialog → Critique → ImagePrompt → Optimizer → ImageGen`
 
+## Downstream Model Control
+
+Downstream apps (Web App, iPhone App, Clockchain, Billing, Enterprise integrations) have full control over model selection and generation hyperparameters on every request. All 14 pipeline agents respect these parameters.
+
+### Model Selection Priority
+
+Model selection follows this precedence (highest first):
+
+1. **Explicit `text_model` / `image_model`** — exact model by name
+2. **`model_policy: "permissive"`** — auto-selects open-weight models, skips Google grounding
+3. **`preset`** — uses preset's default models
+4. **Server defaults**
+
+These controls are composable: you can combine `model_policy`, explicit models, `preset`, and `llm_params` in the same request.
+
+### Google-Free Generation
+
+Set `model_policy: "permissive"` to route all 14 pipeline agents through open-weight models (DeepSeek R1, Llama, Qwen, Mistral) via OpenRouter with Stability AI (SD3.5 Large Turbo) for images — zero Google API calls, including grounding.
+
+```json
+{
+  "query": "The signing of the Magna Carta, 1215",
+  "generate_image": true,
+  "model_policy": "permissive"
+}
+```
+
+### Explicit Model Override
+
+Use `text_model` and `image_model` to specify any OpenRouter-compatible model ID (e.g. `qwen/qwen3-235b-a22b`, `deepseek/deepseek-r1-0528`), Stability AI model (e.g. `stabilityai/sd3.5-large-turbo`), or Google native model (e.g. `gemini-2.5-flash`). Explicit overrides take priority over `model_policy`.
+
+```json
+{
+  "query": "Apollo 11 Moon Landing, 1969",
+  "model_policy": "permissive",
+  "text_model": "qwen/qwen3-235b-a22b",
+  "generate_image": true
+}
+```
+
+**Available Stability AI image models:**
+
+| Model | Description |
+|-------|-------------|
+| `stabilityai/sd3.5-large-turbo` | Fast generation (default for permissive mode) |
+| `stabilityai/sd3.5-large` | Best quality |
+| `stabilityai/sd3.5-medium` | Balanced speed/quality |
+
+### LLM Parameters (`llm_params`)
+
+Fine-grained control over generation hyperparameters, applied uniformly across every agent in the pipeline. Request-level `llm_params` override each agent's built-in defaults (e.g. setting `temperature: 0.3` overrides the scene agent's default of 0.7, the dialog agent's default of 0.85, etc.).
+
+| Parameter | Type | Range | Providers | Description |
+|-----------|------|-------|-----------|-------------|
+| `temperature` | float | 0.0–2.0 | All | Sampling temperature. Overrides per-agent defaults (0.2 for factual, 0.85 for creative). |
+| `max_tokens` | int | 1–32768 | All | Max output tokens per agent call. Preset defaults: hyper=1024, balanced=2048, hd=8192. |
+| `top_p` | float | 0.0–1.0 | All | Nucleus sampling threshold. |
+| `top_k` | int | >= 1 | All | Top-k sampling — consider only the k most likely tokens. |
+| `frequency_penalty` | float | -2.0–2.0 | OpenRouter | Penalize tokens proportionally to frequency in output. |
+| `presence_penalty` | float | -2.0–2.0 | OpenRouter | Penalize tokens that have appeared at all in output. |
+| `repetition_penalty` | float | 0.0–2.0 | OpenRouter | Multiplicative penalty for repeated tokens. |
+| `stop` | string[] | max 4 | All | Stop sequences — generation halts when produced. |
+| `thinking_level` | string | — | Google | Reasoning depth: `"none"`, `"low"`, `"medium"`, `"high"`. |
+| `system_prompt_prefix` | string | max 2000 | All | Text prepended to every agent's system prompt. |
+| `system_prompt_suffix` | string | max 2000 | All | Text appended to every agent's system prompt. |
+
+```json
+{
+  "query": "Turing breaks Enigma, 1941",
+  "text_model": "deepseek/deepseek-r1-0528",
+  "llm_params": {
+    "temperature": 0.5,
+    "max_tokens": 4096,
+    "top_p": 0.9,
+    "system_prompt_suffix": "Keep all descriptions under 200 words. Use British English."
+  }
+}
+```
+
 ## Image Generation
 
-Flash uses a 3-tier fallback chain:
-
-1. **Google Imagen** (primary)
-2. **OpenRouter Flux** (fallback)
-3. **Pollinations.ai** (free fallback)
-
 Image URLs are included in the response when `generate_image: true`.
+
+**Commercial presets** (`hd`, `balanced`, `hyper`, `gemini3`):
+
+1. **Google Imagen** (primary) → **Stability AI** (fallback) → **OpenRouter** (fallback)
+
+**Permissive mode** (`model_policy: "permissive"`):
+
+1. **Stability AI** — SD3.5 Large Turbo (open-weight, no Google dependency)
 
 ## LLM Providers
 
 | Provider | Role |
 |----------|------|
-| Google Gemini | Primary LLM for all agents |
-| OpenRouter | Fallback with dynamic model registry |
+| Google Gemini | Default LLM for all agents (configurable via `text_model` or `model_policy`) |
+| OpenRouter | Open-weight text models (DeepSeek, Llama, Qwen, Mistral) — used with `model_policy: "permissive"` or explicit `text_model` |
+| Stability AI | Open-weight image generation (SD3.5) — default for `model_policy: "permissive"`, or explicit `image_model: "stabilityai/*"` |
+| Pollinations | Free image generation — available via `image_model: "pollinations"` |

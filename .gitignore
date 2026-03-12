@@ -17,3 +17,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Docs sync state
+scripts/.sync-state.json
