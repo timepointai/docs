@@ -12,9 +12,11 @@ The Timepoint ecosystem exposes three HTTP APIs. The Clockchain public endpoints
 | Service | Base URL | Auth Required |
 |---------|----------|---------------|
 | **Flash** | `https://api.timepointai.com` | Yes (`X-Service-Key`) |
-| **Clockchain** (public) | `https://timepoint-clockchain-deploy-private-production.up.railway.app` | No |
+| **Flash** (alias) | `https://flash.timepointai.com` | Yes (`X-Service-Key`) |
+| **Clockchain** (public) | `https://clockchain.timepointai.com` | No |
 | **Clockchain** (write) | Same as above | Yes (`X-Service-Key`) |
-| **Pro Cloud** | `https://timepoint-pro-cloud-private-production.up.railway.app` | Yes (`PRO_API_KEY`) |
+| **Pro Cloud** | `https://pro.timepointai.com` | Yes (`PRO_API_KEY` or Flash JWT) |
+| **MCP** | `https://mcp.timepointai.com` | Yes (MCP API Key) |
 
 ## Quick Examples
 
@@ -22,10 +24,10 @@ The Timepoint ecosystem exposes three HTTP APIs. The Clockchain public endpoints
 
 ```bash
 # Get graph stats
-curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/stats
+curl https://clockchain.timepointai.com/api/v1/stats
 
 # Search moments
-curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments?q=rome&limit=5"
+curl "https://clockchain.timepointai.com/api/v1/moments?q=rome&limit=5"
 ```
 
 ### Flash — Render a Moment
@@ -62,4 +64,10 @@ Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-R
 
 ## CORS
 
-Clockchain public endpoints allow all origins (`CORS_ORIGINS=*`). Rate limit headers are exposed for browser clients.
+All backend services allow cross-origin requests from `*.timepointai.com` subdomains. Each service also accepts a `CORS_ORIGINS` env var for additional origins.
+
+| Service | Allowed Origins | Methods |
+|---------|----------------|---------|
+| Flash | `timepointai.com`, `app.`, `pro.`, `clockchain.`, `flash.`, `timepoint.ai` | All |
+| Clockchain | `timepointai.com`, `app.`, `api.`, `flash.`, `localhost:3000` | GET, OPTIONS |
+| Pro Cloud | `timepointai.com`, `app.`, `api.`, `flash.`, `timepoint.ai`, `localhost:3000` | All |

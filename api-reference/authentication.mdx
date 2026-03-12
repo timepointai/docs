@@ -10,8 +10,8 @@ description: "How to authenticate with the Timepoint APIs."
 The Clockchain public API requires no authentication:
 
 ```bash
-curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/stats
-curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments?limit=10
+curl https://clockchain.timepointai.com/api/v1/stats
+curl https://clockchain.timepointai.com/api/v1/moments?limit=10
 ```
 
 ## Service Key Auth
@@ -32,6 +32,28 @@ curl -H "X-Service-Key: YOUR_KEY" \
 | `PRO_API_KEY` | Pro Cloud API |
 | `ADMIN_KEY` | Clockchain admin operations |
 
+## Flash JWT Auth (End Users)
+
+Flash is the auth authority for end users. It issues JWTs via Apple Sign-In and demo auth flows.
+
+Other services validate Flash-issued JWTs via **token introspection** — no shared JWT secrets required:
+
+1. Client sends `Authorization: Bearer <flash-jwt>` to any service (e.g. `pro.timepointai.com`)
+2. The service calls `GET https://api.timepointai.com/api/v1/auth/me` with the bearer token
+3. Flash validates the token and returns the user profile
+4. The service extracts the user ID and proceeds
+
+This means a user authenticated with Flash can use the same JWT across all Timepoint services.
+
+## Auth by Service
+
+| Service | End-User Auth | Service-to-Service |
+|---------|--------------|-------------------|
+| Flash (`api.timepointai.com`) | JWT (Apple Sign-In, demo) | `X-Service-Key` |
+| Clockchain (`clockchain.timepointai.com`) | None (public reads) | `X-Service-Key` |
+| Pro Cloud (`pro.timepointai.com`) | Flash JWT (introspection) | `X-Service-Key` or `INTERNAL_API_KEY` |
+| MCP (`mcp.timepointai.com`) | MCP API Key | `X-Service-Key` |
+
 ## Getting Access
 
 Service keys are currently available via the developer preview program. Sign up at [timepointai.com](https://timepointai.com).
@@ -43,12 +65,12 @@ All services expose unauthenticated health endpoints:
 ```bash
 # Flash
 curl https://api.timepointai.com/health
-# → {"status":"healthy","version":"2.4.0","database":true,"providers":{"google":true,"openrouter":true}}
+# → {"status":"healthy","version":"2.4.0","database":true,"providers":{"google":true,"openrouter":true,"stability":true}}
 
 # Pro Cloud
-curl https://timepoint-pro-cloud-private-production.up.railway.app/health
+curl https://pro.timepointai.com/health
 # → {"status":"healthy","service":"timepoint-pro-cloud","version":"0.1.0"}
 
 # Clockchain (via stats)
-curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/stats
+curl https://clockchain.timepointai.com/api/v1/stats
 ```

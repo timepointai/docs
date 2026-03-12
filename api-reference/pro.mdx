@@ -5,9 +5,9 @@ description: "Run SNAG-powered social simulations via Pro Cloud."
 
 # Pro API
 
-**Base URL:** `https://timepoint-pro-cloud-private-production.up.railway.app`
+**Base URL:** `https://pro.timepointai.com`
 
-Requires `PRO_API_KEY` or `X-Service-Key` header authentication.
+Requires `PRO_API_KEY`, `X-Service-Key`, or Flash-issued JWT (`Authorization: Bearer <token>`) authentication. Flash JWTs are validated via [token introspection](/api-reference/authentication#flash-jwt-auth-end-users).
 
 ## Health Check
 
@@ -33,7 +33,7 @@ Pro Cloud wraps the open-source Pro engine with Postgres persistence, Celery job
 ### Request
 
 ```bash
-curl -X POST https://timepoint-pro-cloud-private-production.up.railway.app/api/v1/simulate \
+curl -X POST https://pro.timepointai.com/api/v1/simulate \
   -H "Content-Type: application/json" \
   -H "X-Service-Key: YOUR_KEY" \
   -d '{

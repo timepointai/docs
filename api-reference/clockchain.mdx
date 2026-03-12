@@ -5,7 +5,7 @@ description: "Query the temporal causal graph — public read access, no authent
 
 # Clockchain API
 
-**Base URL:** `https://timepoint-clockchain-deploy-private-production.up.railway.app`
+**Base URL:** `https://clockchain.timepointai.com`
 
 Public endpoints require no authentication. Write/admin endpoints require `X-Service-Key`.
 
@@ -16,7 +16,7 @@ Public endpoints require no authentication. Write/admin endpoints require `X-Ser
 Graph statistics.
 
 ```bash
-curl https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/stats
+curl https://clockchain.timepointai.com/api/v1/stats
 ```
 
 **Response:**
@@ -58,10 +58,10 @@ Paginated list of moments with filtering.
 
 ```bash
 # Search for events in Rome
-curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments?q=rome&limit=5"
+curl "https://clockchain.timepointai.com/api/v1/moments?q=rome&limit=5"
 
 # Events between 1900-2000
-curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments?year_from=1900&year_to=2000"
+curl "https://clockchain.timepointai.com/api/v1/moments?year_from=1900&year_to=2000"
 ```
 
 **Response:**
@@ -90,7 +90,7 @@ curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/
 Get a specific moment by canonical path, including its edges.
 
 ```bash
-curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments/-44/march/15/1030/italy/lazio/rome/assassination-of-julius-caesar"
+curl "https://clockchain.timepointai.com/api/v1/moments/-44/march/15/1030/italy/lazio/rome/assassination-of-julius-caesar"
 ```
 
 ## Authenticated Endpoints
@@ -118,6 +118,6 @@ The Clockchain provides built-in interactive documentation:
 Add `?format=tdf` to any moment endpoint to get TDF-formatted output:
 
 ```bash
-curl "https://timepoint-clockchain-deploy-private-production.up.railway.app/api/v1/moments/{path}?format=tdf" \
+curl "https://clockchain.timepointai.com/api/v1/moments/{path}?format=tdf" \
   -H "X-Service-Key: YOUR_KEY"
 ```
