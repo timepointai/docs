@@ -23,14 +23,7 @@ curl -H "X-Service-Key: YOUR_KEY" \
   https://api.timepointai.com/api/v1/timepoints/generate/sync
 ```
 
-### Service Keys
-
-| Key | Used By |
-|-----|---------|
-| `FLASH_SERVICE_KEY` | Flash API + Clockchain renderer |
-| `SERVICE_API_KEY` | Clockchain authenticated endpoints |
-| `PRO_API_KEY` | Pro Cloud API |
-| `ADMIN_KEY` | Clockchain admin operations |
+Service keys are issued per-service. Pass your key in the `X-Service-Key` header with every authenticated request.
 
 ## Flash JWT Auth (End Users)
 
@@ -52,7 +45,7 @@ This means a user authenticated with Flash can use the same JWT across all Timep
 | API Gateway (`api.timepointai.com`) | Forwards auth headers | N/A (stateless proxy) |
 | Flash (`flash.timepointai.com`) | JWT (Apple Sign-In, demo) | `X-Service-Key` |
 | Clockchain (`clockchain.timepointai.com`) | None (public reads) | `X-Service-Key` |
-| Pro Cloud (`pro.timepointai.com`) | Flash JWT (introspection) | `X-Service-Key` or `INTERNAL_API_KEY` |
+| Pro Cloud (`pro.timepointai.com`) | Flash JWT (introspection) | `X-Service-Key` |
 | Billing (`billing.timepointai.com`) | N/A (internal) | `X-Service-Key` |
 | MCP (`mcp.timepointai.com`) | MCP API Key | `X-Service-Key` |
 
@@ -67,15 +60,15 @@ All services expose unauthenticated health endpoints:
 ```bash
 # API Gateway
 curl https://api.timepointai.com/health
-# → {"status":"healthy","service":"timepoint-api-gateway","version":"0.1.0"}
+# → {"status":"healthy","version":"0.1.0"}
 
 # Flash (direct)
 curl https://flash.timepointai.com/health
-# → {"status":"healthy","version":"2.4.0","database":true,"providers":{"google":true,"openrouter":true,"stability":true}}
+# → {"status":"healthy","version":"2.4.0","providers":{"google":true,"openrouter":true,"stability":true}}
 
 # Pro Cloud
 curl https://pro.timepointai.com/health
-# → {"status":"healthy","service":"timepoint-pro-cloud","version":"0.1.0"}
+# → {"status":"healthy","version":"0.1.0"}
 
 # Clockchain (via stats)
 curl https://clockchain.timepointai.com/api/v1/stats

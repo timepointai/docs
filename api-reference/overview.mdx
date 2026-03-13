@@ -83,7 +83,7 @@ Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-R
 
 ## Internal Routes
 
-The gateway blocks all `/internal/*` paths — these are for direct service-to-service calls only (e.g. billing callbacks to Flash via Railway internal networking). Never route internal calls through the gateway.
+The gateway blocks all `/internal/*` paths — these are reserved for direct service-to-service calls only. Never route internal calls through the gateway.
 
 ## CORS
 
