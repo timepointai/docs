@@ -39,19 +39,21 @@ Flash is the auth authority for end users. It issues JWTs via Apple Sign-In and 
 Other services validate Flash-issued JWTs via **token introspection** — no shared JWT secrets required:
 
 1. Client sends `Authorization: Bearer <flash-jwt>` to any service (e.g. `pro.timepointai.com`)
-2. The service calls `GET https://api.timepointai.com/api/v1/auth/me` with the bearer token
+2. The service calls `GET https://flash.timepointai.com/api/v1/auth/me` with the bearer token (direct, not through gateway)
 3. Flash validates the token and returns the user profile
 4. The service extracts the user ID and proceeds
 
-This means a user authenticated with Flash can use the same JWT across all Timepoint services.
+This means a user authenticated with Flash can use the same JWT across all Timepoint services. The gateway forwards `Authorization` headers transparently, so consumer apps don't need to change anything.
 
 ## Auth by Service
 
 | Service | End-User Auth | Service-to-Service |
 |---------|--------------|-------------------|
-| Flash (`api.timepointai.com`) | JWT (Apple Sign-In, demo) | `X-Service-Key` |
+| API Gateway (`api.timepointai.com`) | Forwards auth headers | N/A (stateless proxy) |
+| Flash (`flash.timepointai.com`) | JWT (Apple Sign-In, demo) | `X-Service-Key` |
 | Clockchain (`clockchain.timepointai.com`) | None (public reads) | `X-Service-Key` |
 | Pro Cloud (`pro.timepointai.com`) | Flash JWT (introspection) | `X-Service-Key` or `INTERNAL_API_KEY` |
+| Billing (`billing.timepointai.com`) | N/A (internal) | `X-Service-Key` |
 | MCP (`mcp.timepointai.com`) | MCP API Key | `X-Service-Key` |
 
 ## Getting Access
@@ -63,8 +65,12 @@ Service keys are currently available via the developer preview program. Sign up 
 All services expose unauthenticated health endpoints:
 
 ```bash
-# Flash
+# API Gateway
 curl https://api.timepointai.com/health
+# → {"status":"healthy","service":"timepoint-api-gateway","version":"0.1.0"}
+
+# Flash (direct)
+curl https://flash.timepointai.com/health
 # → {"status":"healthy","version":"2.4.0","database":true,"providers":{"google":true,"openrouter":true,"stability":true}}
 
 # Pro Cloud

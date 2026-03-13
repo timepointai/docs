@@ -1,22 +1,41 @@
 ---
 title: API Overview
-description: "Overview of the Timepoint AI APIs — Flash, Clockchain, and Pro."
+description: "Overview of the Timepoint AI APIs — Gateway, Flash, Clockchain, Pro, and Billing."
 ---
 
 # API Overview
 
-The Timepoint ecosystem exposes three HTTP APIs. The Clockchain public endpoints require no authentication. Flash and Pro require service keys.
+All consumer traffic goes through the **API Gateway** at `api.timepointai.com`, which routes requests to backend services. Each service also has a direct subdomain for service-to-service calls.
 
-## Base URLs
+## Architecture
 
-| Service | Base URL | Auth Required |
-|---------|----------|---------------|
-| **Flash** | `https://api.timepointai.com` | Yes (`X-Service-Key`) |
-| **Flash** (alias) | `https://flash.timepointai.com` | Yes (`X-Service-Key`) |
-| **Clockchain** (public) | `https://clockchain.timepointai.com` | No |
-| **Clockchain** (write) | Same as above | Yes (`X-Service-Key`) |
-| **Pro Cloud** | `https://pro.timepointai.com` | Yes (`PRO_API_KEY` or Flash JWT) |
-| **MCP** | `https://mcp.timepointai.com` | Yes (MCP API Key) |
+```
+Client (iPhone, Web App, MCP, etc.)
+  │
+  ▼
+api.timepointai.com  ──>  API Gateway (stateless reverse proxy)
+  │
+  ├── /api/v1/clockchain/*  ──>  clockchain.timepointai.com
+  ├── /api/v1/billing/*     ──>  billing.timepointai.com
+  ├── /api/v1/* (all else)  ──>  flash.timepointai.com
+  ├── /internal/*           ──>  403 BLOCKED
+  └── /health               ──>  gateway health (native)
+```
+
+## Domain Map
+
+| Domain | Service | Auth | Notes |
+|--------|---------|------|-------|
+| `api.timepointai.com` | API Gateway | Forwards auth headers | Consumer-facing entry point — routes to backends |
+| `flash.timepointai.com` | Flash | `X-Service-Key` or JWT | Auth authority, timepoint generation, SSE streaming |
+| `clockchain.timepointai.com` | Clockchain | None (public reads) / `X-Service-Key` (writes) | Temporal causal graph |
+| `pro.timepointai.com` | Pro Cloud | `PRO_API_KEY` or Flash JWT | SNAG social simulations |
+| `billing.timepointai.com` | Billing | `X-Service-Key` | Credit packs, subscriptions, Apple/Stripe verification |
+| `mcp.timepointai.com` | MCP Server | MCP API Key | AI agent interface (planned) |
+
+**Consumer apps** (iPhone, web app, external clients) should use `api.timepointai.com` — the gateway routes transparently.
+
+**Service-to-service calls** should use direct subdomains (e.g. `flash.timepointai.com`) to skip the gateway hop.
 
 ## Quick Examples
 
@@ -61,6 +80,10 @@ All APIs return JSON. Clockchain public endpoints return paginated results:
 | Auth writes | 30/min | POST/PUT/DELETE with service key |
 
 Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+## Internal Routes
+
+The gateway blocks all `/internal/*` paths — these are for direct service-to-service calls only (e.g. billing callbacks to Flash via Railway internal networking). Never route internal calls through the gateway.
 
 ## CORS
 
