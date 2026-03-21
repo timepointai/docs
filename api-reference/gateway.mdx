@@ -45,33 +45,18 @@ All auth endpoints are at `https://api.timepointai.com/api/v1/auth/`.
 | GET | `/credits/costs` | Get operation costs | None (public) |
 | POST | `/credits/admin/grant` | Admin credit grant | X-Admin-Key |
 
-## Internal Endpoints (Service-to-Service)
-
-These endpoints are used by Billing and other services. Not consumer-facing.
-
-<Warning>
-The gateway blocks all `/internal/*` paths from external traffic. These routes are only reachable via direct service-to-service calls on Railway internal networking.
-</Warning>
-
-| Method | Path | Description | Auth |
-|--------|------|-------------|------|
-| POST | `/internal/credits/grant` | Grant credits to user | X-Service-Key |
-| POST | `/internal/credits/spend` | Deduct credits | X-Service-Key |
-| GET | `/internal/credits/check` | Check balance | X-Service-Key |
-
 ## Proxy Routes
 
-The gateway proxies unmatched routes to downstream services, injecting identity and service headers:
+The gateway proxies requests to downstream services based on URL pattern:
 
-| Pattern | Destination | Headers Added |
-|---------|-------------|---------------|
-| `/api/v1/timepoints/*` | Flash | `X-User-ID`, `X-Service-Key` |
-| `/api/v1/clockchain/*` | Clockchain | `X-Service-Key` |
-| `/api/v1/billing/*` | Billing | `X-Service-Key` |
-| `/api/v1/falcon/*` | Falcon | `X-Service-Key` |
+| Pattern | Destination |
+|---------|-------------|
+| `/api/v1/timepoints/*` | Flash |
+| `/api/v1/clockchain/*` | Clockchain |
+| `/api/v1/billing/*` | Billing |
 
 <Note>
-Flash runs with `AUTH_ENABLED=false` — it trusts the `X-User-ID` header injected by the gateway. Never expose Flash directly to untrusted clients.
+Backend services are internal only and accessed exclusively through the gateway. Never call backend services directly from untrusted clients.
 </Note>
 
 ## Authentication Flow

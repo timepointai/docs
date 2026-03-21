@@ -20,9 +20,8 @@ api.timepointai.com  ──>  API Gateway (auth authority, credits, rate limitin
   ├── /api/v1/credits/*       ──>  gateway-native (credit balance, usage)
   ├── /api/v1/clockchain/*    ──>  clockchain.timepointai.com
   ├── /api/v1/billing/*       ──>  billing.timepointai.com
-  ├── /api/v1/timepoints/*    ──>  flash.timepointai.com (with X-User-ID header)
-  ├── /api/v1/* (all else)    ──>  flash.timepointai.com (with X-User-ID header)
-  ├── /internal/*             ──>  403 BLOCKED
+  ├── /api/v1/timepoints/*    ──>  flash.timepointai.com
+  ├── /api/v1/* (all else)    ──>  flash.timepointai.com
   └── /health                 ──>  gateway health (native)
 ```
 
@@ -31,11 +30,11 @@ api.timepointai.com  ──>  API Gateway (auth authority, credits, rate limitin
 | Domain | Service | Auth | Notes |
 |--------|---------|------|-------|
 | `api.timepointai.com` | API Gateway | Bearer JWT, API keys | Auth authority — validates auth, manages credits, proxies to backends |
-| `flash.timepointai.com` | Flash | None (trusts `X-User-ID` from Gateway) | Generation engine — AUTH_ENABLED=false, internal only |
-| `clockchain.timepointai.com` | Clockchain | None (public reads) / `WRITER_TOKENS` (writes) | Temporal causal graph |
+| `flash.timepointai.com` | Flash | Internal only, accessed via Gateway | Generation engine |
+| `clockchain.timepointai.com` | Clockchain | None (public reads) / authenticated writes | Temporal causal graph |
 | `clockchain.timepointai.com/mcp/` | Clockchain MCP | MCP tools (public reads) | Streamable HTTP MCP interface (v1.26.0) |
-| `pro.timepointai.com` | Pro Cloud | `PRO_API_KEY` or Gateway JWT | SNAG social simulations |
-| `billing.timepointai.com` | Billing | `X-Service-Key` | Credit packs, subscriptions, Apple/Stripe verification |
+| `pro.timepointai.com` | Pro Cloud | Gateway JWT or API key | SNAG social simulations |
+| `billing.timepointai.com` | Billing | Internal only | Credit packs, subscriptions, payment verification |
 
 **Consumer apps** (iPhone, web app, external clients) should use `api.timepointai.com` — the gateway authenticates and routes transparently.
 
@@ -85,16 +84,6 @@ All APIs return JSON. Clockchain public endpoints return paginated results:
 
 Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 
-## Internal Routes
-
-The gateway blocks all `/internal/*` paths — these are for direct service-to-service calls only (e.g. billing callbacks to Flash via Railway internal networking). Never route internal calls through the gateway.
-
 ## CORS
 
-All backend services allow cross-origin requests from `*.timepointai.com` subdomains. Each service also accepts a `CORS_ORIGINS` env var for additional origins.
-
-| Service | Allowed Origins | Methods |
-|---------|----------------|---------|
-| Flash | `timepointai.com`, `app.`, `pro.`, `clockchain.`, `flash.`, `timepoint.ai` | All |
-| Clockchain | `timepointai.com`, `app.`, `api.`, `flash.`, `localhost:3000` | GET, OPTIONS |
-| Pro Cloud | `timepointai.com`, `app.`, `api.`, `flash.`, `timepoint.ai`, `localhost:3000` | All |
+All services allow cross-origin requests from `*.timepointai.com` subdomains.
