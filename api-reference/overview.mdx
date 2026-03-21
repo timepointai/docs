@@ -5,7 +5,7 @@ description: "Overview of the Timepoint AI APIs — Gateway, Flash, Clockchain, 
 
 # API Overview
 
-All consumer traffic goes through the **API Gateway** at `api.timepointai.com`, which routes requests to backend services. Each service also has a direct subdomain for service-to-service calls.
+All consumer traffic goes through the **API Gateway** at `api.timepointai.com`, which authenticates requests, manages credits, enforces rate limits, and proxies to backend services. Each service also has a direct subdomain for service-to-service calls.
 
 ## Architecture
 
@@ -13,29 +13,33 @@ All consumer traffic goes through the **API Gateway** at `api.timepointai.com`, 
 Client (iPhone, Web App, MCP, etc.)
   │
   ▼
-api.timepointai.com  ──>  API Gateway (stateless reverse proxy)
+api.timepointai.com  ──>  API Gateway (auth authority, credits, rate limiting, proxy)
   │
-  ├── /api/v1/clockchain/*  ──>  clockchain.timepointai.com
-  ├── /api/v1/billing/*     ──>  billing.timepointai.com
-  ├── /api/v1/* (all else)  ──>  flash.timepointai.com
-  ├── /internal/*           ──>  403 BLOCKED
-  └── /health               ──>  gateway health (native)
+  ├── /api/v1/auth/*          ──>  gateway-native (JWT, OAuth, API keys)
+  ├── /api/v1/users/*         ──>  gateway-native (user management)
+  ├── /api/v1/credits/*       ──>  gateway-native (credit balance, usage)
+  ├── /api/v1/clockchain/*    ──>  clockchain.timepointai.com
+  ├── /api/v1/billing/*       ──>  billing.timepointai.com
+  ├── /api/v1/timepoints/*    ──>  flash.timepointai.com (with X-User-ID header)
+  ├── /api/v1/* (all else)    ──>  flash.timepointai.com (with X-User-ID header)
+  ├── /internal/*             ──>  403 BLOCKED
+  └── /health                 ──>  gateway health (native)
 ```
 
 ## Domain Map
 
 | Domain | Service | Auth | Notes |
 |--------|---------|------|-------|
-| `api.timepointai.com` | API Gateway | Forwards auth headers | Consumer-facing entry point — routes to backends |
-| `flash.timepointai.com` | Flash | `X-Service-Key` or JWT | Auth authority, timepoint generation, SSE streaming |
-| `clockchain.timepointai.com` | Clockchain | None (public reads) / `X-Service-Key` (writes) | Temporal causal graph |
-| `pro.timepointai.com` | Pro Cloud | `PRO_API_KEY` or Flash JWT | SNAG social simulations |
+| `api.timepointai.com` | API Gateway | Bearer JWT, API keys | Auth authority — validates auth, manages credits, proxies to backends |
+| `flash.timepointai.com` | Flash | None (trusts `X-User-ID` from Gateway) | Generation engine — AUTH_ENABLED=false, internal only |
+| `clockchain.timepointai.com` | Clockchain | None (public reads) / `WRITER_TOKENS` (writes) | Temporal causal graph |
+| `clockchain.timepointai.com/mcp/` | Clockchain MCP | MCP tools (public reads) | Streamable HTTP MCP interface (v1.26.0) |
+| `pro.timepointai.com` | Pro Cloud | `PRO_API_KEY` or Gateway JWT | SNAG social simulations |
 | `billing.timepointai.com` | Billing | `X-Service-Key` | Credit packs, subscriptions, Apple/Stripe verification |
-| `mcp.timepointai.com` | MCP Server | MCP API Key | AI agent interface (planned) |
 
-**Consumer apps** (iPhone, web app, external clients) should use `api.timepointai.com` — the gateway routes transparently.
+**Consumer apps** (iPhone, web app, external clients) should use `api.timepointai.com` — the gateway authenticates and routes transparently.
 
-**Service-to-service calls** should use direct subdomains (e.g. `flash.timepointai.com`) to skip the gateway hop.
+**Service-to-service calls** should use direct subdomains (e.g. `clockchain.timepointai.com`) with appropriate service keys to skip the gateway hop.
 
 ## Quick Examples
 
@@ -49,12 +53,12 @@ curl https://clockchain.timepointai.com/api/v1/stats
 curl "https://clockchain.timepointai.com/api/v1/moments?q=rome&limit=5"
 ```
 
-### Flash — Render a Moment
+### Flash — Render a Moment (via Gateway)
 
 ```bash
 curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
   -H "Content-Type: application/json" \
-  -H "X-Service-Key: YOUR_KEY" \
+  -H "Authorization: Bearer YOUR_JWT" \
   -d '{"query": "Moon landing, July 20 1969", "generate_image": true}'
 ```
 
@@ -77,7 +81,7 @@ All APIs return JSON. Clockchain public endpoints return paginated results:
 |------|-------|------------|
 | Public | 60/min | Clockchain unauthenticated reads |
 | Auth reads | 300/min | Authenticated GET requests |
-| Auth writes | 30/min | POST/PUT/DELETE with service key |
+| Auth writes | 30/min | POST/PUT/DELETE with auth |
 
 Rate limit headers: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
 

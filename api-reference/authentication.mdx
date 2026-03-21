@@ -5,6 +5,62 @@ description: "How to authenticate with the Timepoint APIs."
 
 # Authentication
 
+The **API Gateway** (`api.timepointai.com`) is the auth authority for the Timepoint ecosystem. It owns JWT issuance, OAuth provider integration, API key validation, and credit management. Backend services like Flash have auth disabled and trust identity headers from the Gateway.
+
+## Auth Schemes
+
+### Bearer JWT (End Users)
+
+The Gateway issues JWTs via OAuth sign-in (Apple, Google, GitHub) and demo auth flows. Consumer apps send the JWT as a Bearer token to the Gateway, which validates it and proxies requests to backend services with an `X-User-ID` header.
+
+```bash
+curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT" \
+  -d '{"query": "Moon landing, July 20 1969", "generate_image": true}'
+```
+
+### API Keys (External Developers)
+
+API keys are validated by the Gateway. They function like Bearer tokens for programmatic access:
+
+```bash
+curl https://api.timepointai.com/api/v1/timepoints/generate/sync \
+  -H "X-API-Key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Moon landing, July 20 1969"}'
+```
+
+### X-Service-Key (Service-to-Service)
+
+Used for direct service-to-service calls that bypass the Gateway (e.g. Billing to Flash, Pro to Clockchain):
+
+```bash
+curl -H "X-Service-Key: YOUR_KEY" \
+  https://billing.timepointai.com/api/v1/credits/balance
+```
+
+### X-Admin-Key (Admin Operations)
+
+Used for privileged admin operations on backend services:
+
+```bash
+curl -H "X-Admin-Key: YOUR_ADMIN_KEY" \
+  https://clockchain.timepointai.com/admin/reindex
+```
+
+## OAuth Providers
+
+The Gateway supports three OAuth providers for end-user authentication:
+
+| Provider | Flow | Notes |
+|----------|------|-------|
+| Apple Sign-In | OAuth 2.0 / OIDC | Primary auth for iOS apps |
+| Google | OAuth 2.0 | Web and cross-platform |
+| GitHub | OAuth 2.0 | Developer access |
+
+All OAuth flows go through the Gateway's `/api/v1/auth/*` endpoints, which issue Gateway JWTs upon successful authentication.
+
 ## Public Access (No Auth)
 
 The Clockchain public API requires no authentication:
@@ -14,47 +70,49 @@ curl https://clockchain.timepointai.com/api/v1/stats
 curl https://clockchain.timepointai.com/api/v1/moments?limit=10
 ```
 
-## Service Key Auth
+## X-User-ID Proxy Pattern
 
-Flash, Clockchain write endpoints, and Pro use `X-Service-Key` header authentication:
+When a consumer request hits the Gateway:
 
-```bash
-curl -H "X-Service-Key: YOUR_KEY" \
-  https://api.timepointai.com/api/v1/timepoints/generate/sync
-```
+1. Client sends `Authorization: Bearer <jwt>` to `api.timepointai.com`
+2. Gateway validates the JWT and extracts the user identity
+3. Gateway proxies the request to the backend service (e.g. Flash) with an `X-User-ID` header
+4. The backend service trusts `X-User-ID` — it does not validate the JWT itself
 
-### Service Keys
+Flash has `AUTH_ENABLED=false`. It does not perform any authentication. It trusts the `X-User-ID` header injected by the Gateway.
+
+## Service Keys
 
 | Key | Used By |
 |-----|---------|
-| `FLASH_SERVICE_KEY` | Flash API + Clockchain renderer |
+| `FLASH_SERVICE_KEY` | Service-to-service calls to Flash |
 | `SERVICE_API_KEY` | Clockchain authenticated endpoints |
 | `PRO_API_KEY` | Pro Cloud API |
-| `ADMIN_KEY` | Clockchain admin operations |
-
-## Flash JWT Auth (End Users)
-
-Flash is the auth authority for end users. It issues JWTs via Apple Sign-In and demo auth flows.
-
-Other services validate Flash-issued JWTs via **token introspection** — no shared JWT secrets required:
-
-1. Client sends `Authorization: Bearer <flash-jwt>` to any service (e.g. `pro.timepointai.com`)
-2. The service calls `GET https://flash.timepointai.com/api/v1/auth/me` with the bearer token (direct, not through gateway)
-3. Flash validates the token and returns the user profile
-4. The service extracts the user ID and proceeds
-
-This means a user authenticated with Flash can use the same JWT across all Timepoint services. The gateway forwards `Authorization` headers transparently, so consumer apps don't need to change anything.
+| `ADMIN_KEY` | Clockchain admin operations (via `X-Admin-Key`) |
+| `WRITER_TOKENS` | Clockchain write operations (per-writer identity tokens) |
 
 ## Auth by Service
 
-| Service | End-User Auth | Service-to-Service |
-|---------|--------------|-------------------|
-| API Gateway (`api.timepointai.com`) | Forwards auth headers | N/A (stateless proxy) |
-| Flash (`flash.timepointai.com`) | JWT (Apple Sign-In, demo) | `X-Service-Key` |
-| Clockchain (`clockchain.timepointai.com`) | None (public reads) | `X-Service-Key` |
-| Pro Cloud (`pro.timepointai.com`) | Flash JWT (introspection) | `X-Service-Key` or `INTERNAL_API_KEY` |
-| Billing (`billing.timepointai.com`) | N/A (internal) | `X-Service-Key` |
-| MCP (`mcp.timepointai.com`) | MCP API Key | `X-Service-Key` |
+| Service | End-User Auth | Service-to-Service | Notes |
+|---------|--------------|-------------------|-------|
+| API Gateway (`api.timepointai.com`) | Bearer JWT, API keys | N/A | Auth authority — validates all consumer auth |
+| Flash (`flash.timepointai.com`) | None (AUTH_ENABLED=false) | `X-Service-Key` | Trusts `X-User-ID` from Gateway |
+| Clockchain (`clockchain.timepointai.com`) | None (public reads) | `WRITER_TOKENS` (writes), `X-Admin-Key` (admin) | Public read, authenticated write |
+| Clockchain MCP (`clockchain.timepointai.com/mcp/`) | None (public reads) | N/A | Streamable HTTP, v1.26.0 |
+| Pro Cloud (`pro.timepointai.com`) | Gateway JWT (introspection) | `X-Service-Key` or `INTERNAL_API_KEY` | Validates JWTs via Gateway |
+| Billing (`billing.timepointai.com`) | N/A (internal) | `X-Service-Key` | Internal service only |
+
+## Gateway-Native Endpoints
+
+These endpoints are handled directly by the Gateway (not proxied to any backend):
+
+| Path | Description |
+|------|-------------|
+| `/api/v1/auth/*` | OAuth flows, JWT issuance, token refresh |
+| `/api/v1/users/*` | User profile management |
+| `/api/v1/credits/*` | Credit balance and usage |
+| `/internal/credits/*` | Internal credit operations (blocked from external access) |
+| `/health` | Gateway health check |
 
 ## Getting Access
 

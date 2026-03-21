@@ -9,11 +9,45 @@ The Clockchain exposes its temporal causal graph via the **Model Context Protoco
 
 ## Status
 
-**In Development** — the Clockchain public API is live and can be used directly by any HTTP-capable agent today. The MCP wrapper adds structured tool definitions for richer integration.
+**Live** — Clockchain MCP v1.26.0 is deployed at `clockchain.timepointai.com/mcp/` using Streamable HTTP transport.
 
-## Available Now (HTTP)
+## Endpoint
 
-Any AI agent can query the Clockchain directly using the public API:
+```
+https://clockchain.timepointai.com/mcp/
+```
+
+**Transport:** Streamable HTTP
+
+## MCP Tools
+
+| Tool | Description |
+|------|-------------|
+| `clockchain_stats` | Get graph statistics (node count, edge types, date range) |
+| `clockchain_search` | Search moments by keyword, date range, entity, location |
+| `clockchain_moment` | Get a specific moment by canonical path with edges |
+| `clockchain_neighbors` | Get causally connected moments |
+| `flash_render` | Render a new historical moment (requires auth) |
+| `pro_simulate` | Run a social simulation (requires auth) |
+
+## Integration Example
+
+Connect the Clockchain MCP server to your AI agent:
+
+```json
+{
+  "mcpServers": {
+    "clockchain": {
+      "url": "https://clockchain.timepointai.com/mcp/",
+      "transport": "streamable-http"
+    }
+  }
+}
+```
+
+## Direct HTTP Access
+
+Any AI agent can also query the Clockchain directly using the public REST API:
 
 ```bash
 # Get graph stats
@@ -28,30 +62,4 @@ GET /api/v1/moments/{canonical-path}
 
 No authentication required. 60 requests/minute rate limit.
 
-## Planned MCP Tools
-
-| Tool | Description |
-|------|-------------|
-| `clockchain_stats` | Get graph statistics (node count, edge types, date range) |
-| `clockchain_search` | Search moments by keyword, date range, entity, location |
-| `clockchain_moment` | Get a specific moment by canonical path with edges |
-| `clockchain_neighbors` | Get causally connected moments |
-| `flash_render` | Render a new historical moment (requires auth) |
-| `pro_simulate` | Run a social simulation (requires auth) |
-
-## Integration Example
-
-Once the MCP server is available, connect it to your AI agent:
-
-```json
-{
-  "mcpServers": {
-    "clockchain": {
-      "url": "https://mcp.timepointai.com",
-      "transport": "sse"
-    }
-  }
-}
-```
-
-Sign up at [timepointai.com](https://timepointai.com) for early access.
+Sign up at [timepointai.com](https://timepointai.com) for early access to authenticated tools.

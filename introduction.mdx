@@ -9,9 +9,12 @@ Timepoint is the infrastructure layer for temporal reasoning. We render the past
 
 ## What is Timepoint?
 
-Timepoint is an open-source ecosystem of six integrated services that work together to build a persistent, growing model of historical and future causality:
+Timepoint is an open-source ecosystem of integrated services that work together to build a persistent, growing model of historical and future causality:
 
 <CardGroup cols={2}>
+  <Card title="Gateway" icon="shield" href="/api-reference/gateway">
+    **The Front Door** — API gateway at api.timepointai.com. Handles authentication (Apple, Google, GitHub OAuth), JWT signing, credits, and user management. All client traffic enters here.
+  </Card>
   <Card title="Flash" icon="bolt" href="/products/flash">
     **The Reality Writer** — type any moment in history, get a grounded scene with characters, dialog, and a photorealistic image via a 14-agent critique-loop pipeline.
   </Card>
@@ -20,6 +23,9 @@ Timepoint is an open-source ecosystem of six integrated services that work toget
   </Card>
   <Card title="Clockchain" icon="link" href="/products/clockchain">
     **The Temporal Causal Graph** — 769 nodes, 5,602 edges, 700 BCE to 2026. PostgreSQL-backed directed graph that accumulates rendered past and simulated future into a growing Bayesian prior.
+  </Card>
+  <Card title="Billing" icon="credit-card" href="/api-reference/overview">
+    **The Commerce Layer** — Stripe payments, Apple IAP, and invite codes. Coordinates with Gateway to grant credits.
   </Card>
   <Card title="TDF" icon="file-code" href="/products/tdf">
     **The Data Format** — JSON-LD interchange format with content-addressed SHA-256 hashing. The universal data contract.
@@ -49,17 +55,24 @@ Where **RAG** answers questions from what was written down, **SNAG** reasons abo
 
 {/* WCAG 1.1.1: accessible text description of architecture diagram */}
 
-Flash receives user queries via timepointai.com and produces grounded scenes. It draws on Clockchain (causal graph), Pro (SNAG engine), and SNAG-Bench (benchmark). Clockchain and Pro share TDF (data format) as their interchange layer.
+All client traffic enters through the API Gateway (api.timepointai.com), which handles authentication, credits, and user management. The Gateway proxies generation requests to Flash with an X-User-ID header. Flash produces grounded scenes, drawing on Clockchain (causal graph), Pro (SNAG engine), and SNAG-Bench (benchmark). Billing handles payments and coordinates with Gateway to grant credits. Clockchain and Pro share TDF (data format) as their interchange layer.
 
 ```
-                        timepointai.com
+                     api.timepointai.com
                               │
                     ┌─────────▼──────────┐
-                    │   Flash (Renderer)  │──── Grounded scenes
-                    └─────────▲──────────┘
-                              │
-              ┌───────────────┼───────────────┐
-              │               │               │
+                    │  Gateway (Auth,     │
+                    │  Credits, Users)    │
+                    └─────────┬──────────┘
+                              │ X-User-ID
+                    ┌─────────▼──────────┐    ┌─────────────────┐
+                    │   Flash (Renderer)  │    │    Billing       │
+                    │  (no auth — pure    │    │  (Stripe, IAP,   │
+                    │   generation engine)│    │   invite codes)  │
+                    └─────────▲──────────┘    └────────┬────────┘
+                              │                        │
+              ┌───────────────┼───────────────┐        │
+              │               │               │   credits/grant
      ┌────────┴────────┐ ┌───┴────┐ ┌────────┴────────┐
      │   Clockchain    │ │  Pro   │ │   SNAG-Bench    │
      │  (Causal Graph) │ │ (SNAG) │ │  (Benchmark)    │
@@ -83,7 +96,7 @@ Flash receives user queries via timepointai.com and produces grounded scenes. It
     Timepoints, temporal modes, and the Clockchain
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference/overview">
-    Flash, Clockchain, and Pro API endpoints
+    Gateway, Flash, Clockchain, and Pro API endpoints
   </Card>
   <Card title="GitHub" icon="github" href="https://github.com/timepointai">
     All source code — Apache-2.0 licensed

@@ -5,16 +5,64 @@ description: "Get started with Timepoint AI — render your first historical mom
 
 # Quickstart
 
-## Flash — Render a Historical Moment
+## Hosted API — The Fastest Path
 
-Flash is the fastest way to see Timepoint in action. It generates grounded historical scenes from natural language.
+The hosted API at `api.timepointai.com` is the easiest way to use Timepoint. The Gateway handles authentication, credits, and proxies your requests to Flash and other services.
 
-### Prerequisites
+### Authenticate
+
+Sign up through the [Timepoint app](https://app.timepointai.com) to get your credentials. The Gateway supports Apple, Google, and GitHub OAuth.
+
+### Render a Moment
+
+```bash
+curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"query": "AlphaGo plays Move 37, Seoul, March 10 2016", "generate_image": true}'
+```
+
+You'll get back a complete scene: characters with distinct voices, period-accurate dialog, relationship dynamics, source citations, and a photorealistic image.
+
+### Query the Clockchain
+
+The Clockchain is a public API — no authentication needed for read access.
+
+```bash
+# Get graph statistics
+curl https://clockchain.timepointai.com/api/v1/stats
+
+# Search moments by keyword
+curl "https://clockchain.timepointai.com/api/v1/moments?q=rome"
+```
+
+### Connect via MCP
+
+The Clockchain exposes a [Model Context Protocol](https://modelcontextprotocol.io) endpoint for LLM tool use:
+
+```
+Endpoint: https://clockchain.timepointai.com/mcp/
+Transport: Streamable HTTP (v1.26.0)
+```
+
+Point any MCP-compatible client (Claude Desktop, Cursor, etc.) at the endpoint to give your LLM direct access to the temporal causal graph.
+
+---
+
+## Local Development
+
+The sections below cover running Timepoint services locally from source.
+
+### Flash — Render a Historical Moment
+
+Flash is a pure generation engine. In production, the Gateway handles auth and proxies requests to Flash. Locally, you can run it standalone.
+
+#### Prerequisites
 
 - Python 3.10+
 - A Google API key ([free at AI Studio](https://aistudio.google.com))
 
-### Install and Run
+#### Install and Run
 
 ```bash
 git clone https://github.com/timepointai/timepoint-flash.git
@@ -34,7 +82,7 @@ Start the server:
 flash serve
 ```
 
-### Render a Moment
+#### Render a Moment
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/timepoints/generate/sync \
@@ -42,15 +90,13 @@ curl -X POST http://localhost:8000/api/v1/timepoints/generate/sync \
   -d '{"query": "AlphaGo plays Move 37, Seoul, March 10 2016", "generate_image": true}'
 ```
 
-You'll get back a complete scene: characters with distinct voices, period-accurate dialog, relationship dynamics, source citations, and a photorealistic image.
-
 ---
 
-## Pro — Run a Social Simulation
+### Pro — Run a Social Simulation
 
 Pro is the SNAG engine — it simulates social dynamics with causal provenance.
 
-### Install and Run
+#### Install and Run
 
 ```bash
 git clone https://github.com/timepointai/timepoint-pro.git
@@ -64,35 +110,26 @@ Set your LLM provider:
 export OPENROUTER_API_KEY="your-key-here"
 ```
 
-### Run a Simulation
+#### Run a Simulation
 
 ```bash
-python run.sh --template board-meeting --fidelity 3
+bash run.sh --template board-meeting --fidelity 3
 ```
 
 Pro supports 21 verified templates at $0.15–$1.00 per run.
 
 ---
 
-## Clockchain — Query the Graph
+### Clockchain — Query the Graph Locally
 
-The Clockchain is a public API — no authentication needed for read access.
-
-### Browse Moments
+See the [Hosted API](#hosted-api--the-fastest-path) section above for querying the public Clockchain. To run locally:
 
 ```bash
-# Get graph statistics
-curl https://clockchain.timepointai.com/api/v1/stats
-
-# List moments
-curl "https://clockchain.timepointai.com/api/v1/moments?limit=10"
-
-# Search by keyword
-curl "https://clockchain.timepointai.com/api/v1/moments?q=rome"
-
-# Filter by date range
-curl "https://clockchain.timepointai.com/api/v1/moments?year_from=1900&year_to=2000"
+git clone https://github.com/timepointai/timepoint-clockchain.git
+cd timepoint-clockchain
 ```
+
+Refer to the repository README for local setup instructions.
 
 ---
 

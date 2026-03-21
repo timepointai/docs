@@ -6,8 +6,9 @@ description: "Query the temporal causal graph — public read access, no authent
 # Clockchain API
 
 **Base URL:** `https://clockchain.timepointai.com`
+**MCP Endpoint:** `https://clockchain.timepointai.com/mcp/` (Streamable HTTP, v1.26.0)
 
-Public endpoints require no authentication. Write/admin endpoints require `X-Service-Key`.
+Public endpoints require no authentication. Write endpoints require `WRITER_TOKENS` (per-writer identity tokens). Admin endpoints require `X-Admin-Key`.
 
 ## Public Endpoints
 
@@ -95,16 +96,26 @@ curl "https://clockchain.timepointai.com/api/v1/moments/-44/march/15/1030/italy/
 
 ## Authenticated Endpoints
 
-These require `X-Service-Key` header:
+Write endpoints require a valid writer token (from `WRITER_TOKENS`). Admin endpoints require `X-Admin-Key`.
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/browse` | GET | Browse graph with full metadata |
-| `/search` | GET | Search with advanced filters |
-| `/random` | GET | Random moment |
-| `/today` | GET | Today in history |
-| `/generate` | POST | Generate new moment via Flash |
-| `/ingest/tdf` | POST | Ingest TDF record |
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/browse` | GET | `X-Service-Key` | Browse graph with full metadata |
+| `/search` | GET | `X-Service-Key` | Search with advanced filters |
+| `/random` | GET | `X-Service-Key` | Random moment |
+| `/today` | GET | `X-Service-Key` | Today in history |
+| `/generate` | POST | `WRITER_TOKENS` | Generate new moment via Flash |
+| `/ingest/tdf` | POST | `WRITER_TOKENS` | Ingest TDF record |
+
+## MCP Endpoint
+
+The Clockchain exposes its temporal causal graph via the **Model Context Protocol (MCP)** at:
+
+```
+https://clockchain.timepointai.com/mcp/
+```
+
+Transport: **Streamable HTTP** (v1.26.0). See the [MCP documentation](/api-reference/mcp) for tools and integration details.
 
 ## Interactive API Docs
 

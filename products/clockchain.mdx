@@ -11,10 +11,23 @@ description: "Persistent temporal causal graph — PostgreSQL-backed directed gr
   <Card title="GitHub" icon="github" href="https://github.com/timepointai/timepoint-clockchain">
     `timepointai/timepoint-clockchain` — Apache-2.0, Python 3.11+, FastAPI
   </Card>
-  <Card title="Detailed Docs" icon="book" href="https://www.mintlify.com/timepointai/timepoint-clockchain">
+  <Card title="Detailed Docs" icon="book" href="https://github.com/timepointai/timepoint-clockchain">
     Full API reference, graph architecture, and deployment docs
   </Card>
 </CardGroup>
+
+## MCP Endpoint
+
+The Clockchain exposes a **Model Context Protocol (MCP)** interface for AI agents and tools:
+
+| Property | Value |
+|----------|-------|
+| **URL** | `https://clockchain.timepointai.com/mcp/` |
+| **Version** | v1.26.0 |
+| **Transport** | Streamable HTTP |
+| **Auth** | Public reads (no auth required) |
+
+Any MCP-compatible client (Claude Desktop, Cursor, etc.) can connect directly to browse and search the temporal graph.
 
 ## Why This Exists
 

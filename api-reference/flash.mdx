@@ -8,7 +8,9 @@ description: "Render grounded historical moments via the 14-agent pipeline."
 **Consumer URL:** `https://api.timepointai.com` (routed via [API Gateway](/api-reference/overview#architecture))
 **Direct URL:** `https://flash.timepointai.com` (for service-to-service calls)
 
-All endpoints require `X-Service-Key` header authentication.
+Consumer access goes through the Gateway, which handles authentication and proxies requests to Flash with an `X-User-ID` header. Flash has `AUTH_ENABLED=false` — it does not perform any authentication itself. It trusts the `X-User-ID` injected by the Gateway.
+
+For service-to-service calls that bypass the Gateway, use `X-Service-Key` with the direct URL.
 
 ## Health Check
 
@@ -38,9 +40,10 @@ No auth required. Returns service status and provider availability.
 Synchronous render — blocks until the full scene is generated.
 
 ```bash
+# Consumer access via Gateway (recommended)
 curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
   -H "Content-Type: application/json" \
-  -H "X-Service-Key: YOUR_KEY" \
+  -H "Authorization: Bearer YOUR_JWT" \
   -d '{"query": "AlphaGo plays Move 37, Seoul, March 10 2016", "generate_image": true}'
 ```
 
@@ -66,9 +69,10 @@ curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
 Server-Sent Events (SSE) stream — returns pipeline progress in real-time as each agent completes.
 
 ```bash
+# Consumer access via Gateway (recommended)
 curl -N -X POST https://api.timepointai.com/api/v1/timepoints/generate/stream \
   -H "Content-Type: application/json" \
-  -H "X-Service-Key: YOUR_KEY" \
+  -H "Authorization: Bearer YOUR_JWT" \
   -d '{"query": "Moon landing, July 20 1969", "generate_image": true}'
 ```
 

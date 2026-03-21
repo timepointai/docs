@@ -80,13 +80,22 @@ JSON-LD interchange format connecting all services. Every TDF record includes:
 - **payload** — source-specific content
 - **tdf_hash** — SHA-256 of canonicalized payload for content addressing
 
+## Gateway
+
+The API Gateway (`api.timepointai.com`) is the entry point for all client traffic. It owns authentication (Apple, Google, and GitHub OAuth), JWT signing and verification, credit management, and user accounts. Generation requests are proxied to Flash with an `X-User-ID` header — Flash itself runs with authentication disabled as a pure generation engine.
+
+## MCP (Model Context Protocol)
+
+The Clockchain exposes a Model Context Protocol endpoint at `clockchain.timepointai.com/mcp/` (Streamable HTTP, v1.26.0). This allows MCP-compatible clients — Claude Desktop, Cursor, and other LLM tools — to query and traverse the temporal causal graph directly as a tool call.
+
 ## The Flywheel
 
 The system forms a self-reinforcing loop:
 
-1. **Flash** renders historical moments into grounded scenes
-2. **Clockchain** stores them as graph nodes with causal edges
-3. **Expander** (LLM) discovers related moments and grows the graph
-4. **Pro** simulates futures from any graph state
-5. **SNAG-Bench** scores quality across all outputs
-6. More data → stronger Bayesian prior → better renderings → more data
+1. **Gateway** authenticates users and routes generation requests
+2. **Flash** renders historical moments into grounded scenes
+3. **Clockchain** stores them as graph nodes with causal edges
+4. **Expander** (LLM) discovers related moments and grows the graph
+5. **Pro** simulates futures from any graph state
+6. **SNAG-Bench** scores quality across all outputs
+7. More data → stronger Bayesian prior → better renderings → more data

@@ -64,6 +64,7 @@
         "pages": [
           "api-reference/overview",
           "api-reference/authentication",
+          "api-reference/gateway",
           "api-reference/clockchain",
           "api-reference/flash",
           "api-reference/pro",

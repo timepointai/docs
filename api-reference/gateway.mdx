@@ -1,0 +1,132 @@
+---
+title: "Gateway"
+description: "API Gateway — auth, credits, user management, and request routing."
+---
+
+# API Gateway
+
+The API Gateway at `api.timepointai.com` is the primary entry point for all client traffic. It handles authentication, authorization, credit management, rate limiting, and proxies requests to downstream services.
+
+<Tip>
+Consumer apps (iPhone, web app, external clients) should always use `api.timepointai.com`. The gateway authenticates and routes transparently — downstream services like Flash never see raw credentials.
+</Tip>
+
+## Auth Endpoints
+
+All auth endpoints are at `https://api.timepointai.com/api/v1/auth/`.
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| POST | `/auth/apple` | Apple Sign-In | None (public) |
+| POST | `/auth/google` | Google Sign-In | None (public) |
+| POST | `/auth/github` | GitHub OAuth | None (public) |
+| POST | `/auth/demo` | Demo login (App Store review) | None (public) |
+| POST | `/auth/refresh` | Refresh JWT token pair | Refresh token |
+| POST | `/auth/logout` | Revoke refresh token | Bearer JWT |
+| GET | `/auth/me` | Get current user profile | Bearer JWT |
+| DELETE | `/auth/me` | Delete account and all data | Bearer JWT |
+| POST | `/auth/dev/token` | Issue dev token | X-Admin-Key |
+| POST | `/auth/service-token` | Issue service token | X-Admin-Key |
+
+## User Endpoints
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| POST | `/users/resolve` | Find or create user by external ID | X-Service-Key |
+| GET | `/users/me/timepoints` | List user's timepoints (proxied to Flash) | Bearer JWT |
+| GET | `/users/me/export` | Export user data | Bearer JWT |
+
+## Credit Endpoints
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| GET | `/credits/balance` | Get credit balance | Bearer JWT |
+| GET | `/credits/history` | Get transaction history | Bearer JWT |
+| GET | `/credits/costs` | Get operation costs | None (public) |
+| POST | `/credits/admin/grant` | Admin credit grant | X-Admin-Key |
+
+## Internal Endpoints (Service-to-Service)
+
+These endpoints are used by Billing and other services. Not consumer-facing.
+
+<Warning>
+The gateway blocks all `/internal/*` paths from external traffic. These routes are only reachable via direct service-to-service calls on Railway internal networking.
+</Warning>
+
+| Method | Path | Description | Auth |
+|--------|------|-------------|------|
+| POST | `/internal/credits/grant` | Grant credits to user | X-Service-Key |
+| POST | `/internal/credits/spend` | Deduct credits | X-Service-Key |
+| GET | `/internal/credits/check` | Check balance | X-Service-Key |
+
+## Proxy Routes
+
+The gateway proxies unmatched routes to downstream services, injecting identity and service headers:
+
+| Pattern | Destination | Headers Added |
+|---------|-------------|---------------|
+| `/api/v1/timepoints/*` | Flash | `X-User-ID`, `X-Service-Key` |
+| `/api/v1/clockchain/*` | Clockchain | `X-Service-Key` |
+| `/api/v1/billing/*` | Billing | `X-Service-Key` |
+| `/api/v1/falcon/*` | Falcon | `X-Service-Key` |
+
+<Note>
+Flash runs with `AUTH_ENABLED=false` — it trusts the `X-User-ID` header injected by the gateway. Never expose Flash directly to untrusted clients.
+</Note>
+
+## Authentication Flow
+
+```
+1. Client → POST /api/v1/auth/{provider}   (Apple, Google, GitHub)
+2. Gateway validates identity → issues JWT access token + refresh token
+3. Client → sends Authorization: Bearer <token> on subsequent requests
+4. Gateway validates JWT → resolves user → checks credits
+5. Gateway proxies request to downstream service with X-User-ID header
+6. Downstream service trusts X-User-ID (no re-authentication)
+```
+
+### Example: Authenticate and Render
+
+```bash
+# 1. Authenticate (Apple Sign-In)
+curl -X POST https://api.timepointai.com/api/v1/auth/apple \
+  -H "Content-Type: application/json" \
+  -d '{"identity_token": "APPLE_ID_TOKEN"}'
+
+# Response: { "access_token": "eyJ...", "refresh_token": "..." }
+
+# 2. Render a moment (proxied to Flash)
+curl -X POST https://api.timepointai.com/api/v1/timepoints/generate/sync \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer eyJ..." \
+  -d '{"query": "Moon landing, July 20 1969", "generate_image": true}'
+
+# 3. Check credit balance
+curl https://api.timepointai.com/api/v1/credits/balance \
+  -H "Authorization: Bearer eyJ..."
+```
+
+## Rate Limits
+
+| Tier | Requests/min | Daily limit |
+|------|-------------|-------------|
+| Free | 10 | 100 |
+| Pro | 60 | 1,000 |
+| Enterprise | 300 | 10,000 |
+
+Rate limit headers are included on every response: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`.
+
+## Health Check
+
+```bash
+GET /health
+```
+
+No auth required. Returns gateway status.
+
+```json
+{
+  "status": "healthy",
+  "version": "1.0.0"
+}
+```

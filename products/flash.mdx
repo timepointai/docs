@@ -11,10 +11,14 @@ description: "The Reality Writer — renders grounded historical moments via a 1
   <Card title="GitHub" icon="github" href="https://github.com/timepointai/timepoint-flash">
     `timepointai/timepoint-flash` — Apache-2.0, Python 3.10+, FastAPI
   </Card>
-  <Card title="Detailed Docs" icon="book" href="https://www.mintlify.com/timepointai/timepoint-flash">
+  <Card title="Detailed Docs" icon="book" href="https://github.com/timepointai/timepoint-flash">
     Full API reference, agent pipeline, and configuration docs
   </Card>
 </CardGroup>
+
+<Note>
+Flash runs behind the [API Gateway](/api-reference/overview) with `AUTH_ENABLED=false` — it is a pure generation engine with no authentication of its own. All consumer access goes through `api.timepointai.com`, which handles auth, credits, and rate limiting before proxying requests to Flash.
+</Note>
 
 ## How It Works
 
