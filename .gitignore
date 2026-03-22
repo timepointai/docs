@@ -21,4 +21,4 @@ Thumbs.db
 # Docs sync state
 scripts/.sync-state.json
 
-.stoneforge/
+.local/
