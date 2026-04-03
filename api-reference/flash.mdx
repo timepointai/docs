@@ -10,6 +10,8 @@ description: "Render grounded historical moments via the 14-agent pipeline."
 
 Consumer access goes through the Gateway, which handles authentication and proxies requests to Flash with an `X-User-ID` header. Flash has `AUTH_ENABLED=false` — it does not perform any authentication itself. It trusts the `X-User-ID` injected by the Gateway.
 
+The `X-User-ID` header is forwarded to Clockchain during entity searches, generation, and background grounding. This enables visibility filtering so users can see their own private entities and shared entities in search results and generation pipelines.
+
 For service-to-service calls that bypass the Gateway, use `X-Service-Key` with the direct URL.
 
 ## Health Check
