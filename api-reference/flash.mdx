@@ -14,11 +14,14 @@ For service-to-service calls that bypass the Gateway, use `X-Service-Key` with t
 
 ## Health Check
 
+### GET /health
+Instant liveness probe — no I/O. Returns service status and configured provider availability.
+
 ```bash
 GET /health
 ```
 
-No auth required. Returns service status and provider availability.
+No auth required.
 
 ```json
 {
@@ -27,11 +30,19 @@ No auth required. Returns service status and provider availability.
   "database": true,
   "providers": {
     "google": true,
-    "openrouter": true,
-    "stability": true
+    "openrouter": true
   }
 }
 ```
+
+### GET /health/deep
+Deep health check — verifies database connectivity and provider configuration.
+
+```bash
+GET /health/deep
+```
+
+No auth required. Performs a live database connection check (5s timeout) and returns `HealthResponse` with actual connectivity status.
 
 ## Render Endpoints
 
