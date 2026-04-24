@@ -88,10 +88,26 @@ All client traffic enters through the API Gateway (api.timepointai.com), which h
 
 ## Get Started
 
+New to Timepoint? These four pages cover the shortest path from zero to a working integration:
+
 <CardGroup cols={2}>
   <Card title="Quickstart" icon="rocket" href="/quickstart">
-    Clone, install, and render your first moment
+    Clone, install, and render your first moment — one click from here to a working `curl` command.
   </Card>
+  <Card title="Authentication — Key Types" icon="key" href="/api-reference/authentication#auth-schemes">
+    The four credential types (Bearer JWT, API Key, X-Service-Key, X-Admin-Key) and when to use each.
+  </Card>
+  <Card title="MCP Tools" icon="plug" href="/api-reference/mcp#mcp-tools">
+    The six MCP tools (`clockchain_stats`, `clockchain_search`, `clockchain_moment`, `clockchain_neighbors`, `flash_render`, `pro_simulate`).
+  </Card>
+  <Card title="Errors & Troubleshooting" icon="triangle-exclamation" href="/errors">
+    HTTP status codes, rate-limit headers, and a decision tree for common failures.
+  </Card>
+</CardGroup>
+
+### Go Deeper
+
+<CardGroup cols={2}>
   <Card title="Core Concepts" icon="book" href="/concepts">
     Timepoints, temporal modes, and the Clockchain
   </Card>
@@ -100,5 +116,8 @@ All client traffic enters through the API Gateway (api.timepointai.com), which h
   </Card>
   <Card title="GitHub" icon="github" href="https://github.com/timepointai">
     All source code — Apache-2.0 licensed
+  </Card>
+  <Card title="Accessibility" icon="universal-access" href="/accessibility">
+    WCAG 2.1 Level A conformance statement
   </Card>
 </CardGroup>

@@ -1,37 +1,57 @@
-# Timepoint AI Documentation
+# Timepoint AI — Documentation
 
-Official documentation for the [Timepoint AI](https://timepointai.com) platform — synthetic time travel through AI-powered temporal simulation.
+Source for [docs.timepointai.com](https://docs.timepointai.com). Built with [Mintlify](https://mintlify.com/).
 
-**Live docs:** [docs.timepointai.com](https://docs.timepointai.com)
+## Start Here
 
-## What's Covered
+If you're reading these files directly (not the rendered site), begin with these four pages — they cover the shortest path from zero to a working integration:
 
-### Getting Started
-Introduction, quickstart guide, core concepts, and accessibility.
+| Page | What's in it |
+|------|--------------|
+| [`introduction.mdx`](./introduction.mdx) | What Timepoint is, the service map, and the architecture diagram |
+| [`quickstart.mdx`](./quickstart.mdx) | Render your first moment via the hosted API; local-dev setup for Flash, Pro, and Clockchain |
+| [`api-reference/authentication.mdx`](./api-reference/authentication.mdx) | The four credential types: Bearer JWT, API Key, X-Service-Key, X-Admin-Key (anchor: `#auth-schemes`) |
+| [`api-reference/mcp.mdx`](./api-reference/mcp.mdx) | The Clockchain MCP server + the six tools it exposes (anchor: `#mcp-tools`) |
+| [`errors.mdx`](./errors.mdx) | HTTP status codes, rate-limit headers, decision tree for common failures |
 
-### Products
-- **Flash** — Generate historically grounded moments with characters, dialog, and images
-- **Pro Cloud** — Run multi-entity SNAG simulations at scale
-- **Clockchain** — Browse and query the temporal causal graph
-- **SNAG-Bench** — Benchmark suite for temporal simulation accuracy
-- **Proteus** — Adaptive narrative engine
-- **TDF** — Temporal Data Format specification
+## Repo Layout
 
-### API Reference
-- Overview, authentication, and Gateway routing
-- Clockchain, Flash, and Pro API endpoints
-- MCP integration for AI agents (Claude, Cursor, Copilot)
-
-## Built With
-
-These docs are built with [Mintlify](https://mintlify.com) and deployed automatically.
-
-## Local Development
-
-```bash
-npx mintlify dev
+```
+docs/
+├── introduction.mdx          Landing page — service map + architecture
+├── quickstart.mdx            Hosted-API curl + local dev
+├── concepts.mdx              Timepoints, SNAG, temporal modes
+├── errors.mdx                Error reference + decision tree
+├── accessibility.mdx         WCAG conformance
+├── api-reference/
+│   ├── overview.mdx          Gateway front-door, domain map, rate limits
+│   ├── authentication.mdx    Auth schemes, OAuth providers, health
+│   ├── gateway.mdx           Gateway endpoints
+│   ├── flash.mdx             Flash rendering API
+│   ├── clockchain.mdx        Clockchain read/write API
+│   ├── pro.mdx               Pro / SNAG simulation API
+│   └── mcp.mdx               MCP server + tools
+├── products/                 Product deep dives (Flash, Pro, Clockchain, …)
+├── logo/                     Brand assets
+└── docs.json                 Mintlify navigation + theme config
 ```
 
-## License
+## Navigation
 
-Apache 2.0 — see [LICENSE](LICENSE)
+The sidebar is defined in [`docs.json`](./docs.json) under `navigation.groups`. Add a new page by:
+
+1. Dropping the `.mdx` file in the right folder.
+2. Adding its slug (no `.mdx` extension) to the appropriate `pages` array in `docs.json`.
+
+## Local Preview
+
+```bash
+npm i -g mintlify
+mintlify dev
+```
+
+Opens the site at http://localhost:3000.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Licensed under Apache-2.0 — see [`LICENSE`](./LICENSE).
