@@ -46,7 +46,7 @@
     "groups": [
       {
         "group": "Getting Started",
-        "pages": ["introduction", "quickstart", "concepts", "accessibility"]
+        "pages": ["introduction", "quickstart", "concepts", "errors", "accessibility"]
       },
       {
         "group": "Products",

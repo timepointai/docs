@@ -1,0 +1,124 @@
+---
+title: Errors & Troubleshooting
+description: "HTTP status codes, error shapes, rate limit headers, and a decision tree for common Timepoint API failures."
+---
+
+# Errors & Troubleshooting
+
+Every Timepoint service is fronted by the [API Gateway](/api-reference/overview) at `api.timepointai.com` (Clockchain public reads are also available directly at `clockchain.timepointai.com`). This page documents the error shapes, status codes, and rate-limit semantics you should expect — and a decision tree for the most common failures.
+
+## Error Response Shape
+
+All Timepoint APIs return JSON. Non-2xx responses include a `detail` or `error` field describing what went wrong:
+
+```json
+{
+  "detail": "Invalid or expired token",
+  "code": "auth.jwt_invalid"
+}
+```
+
+Some endpoints return a bare `{"detail": "..."}` (FastAPI convention); others return a richer `{"error": "...", "code": "..."}` envelope. Always check `response.status` first, then parse the body.
+
+## HTTP Status Codes
+
+| Status | Meaning | Common Causes | Fix |
+|--------|---------|--------------|-----|
+| `400 Bad Request` | Malformed payload | Missing required field, invalid JSON | Check the request body against the [API reference](/api-reference/overview) |
+| `401 Unauthorized` | Missing or invalid credentials | No `Authorization` header, expired JWT, wrong API key | Re-authenticate via the [Gateway](/api-reference/authentication#bearer-jwt-end-users) or refresh your token |
+| `403 Forbidden` | Valid auth, insufficient privilege | Using a consumer JWT against an admin-only endpoint, tenant mismatch | Confirm the [key type](/api-reference/authentication#auth-schemes) matches the endpoint |
+| `404 Not Found` | Resource does not exist | Wrong canonical path, moment not in Clockchain | Search first via `/api/v1/moments?q=...` |
+| `409 Conflict` | Write collides with existing state | Duplicate moment, stale version | Re-fetch, then retry |
+| `422 Unprocessable Entity` | Payload validated but rejected | Schema mismatch, enum out of range | Compare against the example in the relevant product page |
+| `429 Too Many Requests` | Rate limit exceeded | Burst traffic above your tier | Back off using `X-RateLimit-Reset` (see below) |
+| `500 Internal Server Error` | Unhandled server error | Transient bug, upstream provider outage | Retry with exponential backoff; if persistent, file an issue |
+| `502 / 503 / 504` | Gateway or upstream unavailable | Backend deploy, model provider hiccup | Retry; check [status endpoints](/api-reference/authentication#health-check) |
+
+## Decision Tree
+
+Use this to quickly localize a failure:
+
+```
+Got a 4xx or 5xx from api.timepointai.com?
+│
+├─ 401 Unauthorized ───────────► Is your JWT expired?          ──► Re-auth through OAuth
+│                                Is the API key rotated?        ──► Regenerate in dashboard
+│                                Wrong header name?             ──► Bearer → `Authorization`; API key → `X-API-Key`
+│
+├─ 403 Forbidden ──────────────► Endpoint needs admin/service?  ──► Switch to X-Admin-Key / X-Service-Key
+│                                                                   (see /api-reference/authentication#auth-schemes)
+│
+├─ 404 Not Found ──────────────► Moment lookup?                 ──► Search first; canonical paths are slashy
+│                                Wrong subdomain?               ──► Consumer calls go through api.timepointai.com
+│
+├─ 422 Unprocessable ──────────► Field type mismatch            ──► Compare to quickstart example (/quickstart)
+│
+├─ 429 Too Many Requests ─────► Respect `X-RateLimit-Reset`     ──► Sleep until that epoch, then retry
+│
+├─ 5xx from api.timepointai.com ► Retry 2x with backoff         ──► If persistent, check /api-reference/authentication#health-check
+│
+└─ Connection error ───────────► CORS preflight?                ──► Verify origin is *.timepointai.com
+                                 DNS / TLS?                     ──► Check subdomain spelling
+```
+
+## Rate Limits
+
+The Gateway enforces per-tier limits. All rate-limited responses include these headers:
+
+| Header | Meaning |
+|--------|---------|
+| `X-RateLimit-Limit` | Requests allowed in the current window |
+| `X-RateLimit-Remaining` | Requests left in the window |
+| `X-RateLimit-Reset` | Unix epoch when the window resets |
+
+Current tiers (see [Rate Limits](/api-reference/overview#rate-limits) for the canonical table):
+
+| Tier | Limit | Applies To |
+|------|-------|------------|
+| Public | 60 / min | Clockchain unauthenticated reads |
+| Auth reads | 300 / min | Authenticated `GET` |
+| Auth writes | 30 / min | Authenticated `POST` / `PUT` / `DELETE` |
+
+**Client guidance:** on a `429`, do not retry immediately — compute `wait = X-RateLimit-Reset - now()` and sleep. Burst retries cause further throttling.
+
+## Authentication Errors
+
+Authentication failures come from the Gateway and follow this pattern:
+
+```json
+{
+  "detail": "Invalid or expired token",
+  "code": "auth.jwt_invalid"
+}
+```
+
+Common codes:
+
+| Code | Meaning | Next Step |
+|------|---------|-----------|
+| `auth.missing` | No credentials presented | Add `Authorization: Bearer ...` or `X-API-Key: ...` |
+| `auth.jwt_invalid` | JWT signature failed | Re-auth via OAuth — the signing key may have rotated |
+| `auth.jwt_expired` | JWT `exp` passed | Refresh token via `/api/v1/auth/refresh` |
+| `auth.key_revoked` | API key deactivated | Generate a new key in the dashboard |
+| `auth.insufficient_credits` | Account out of credits | Top up via [Billing](/api-reference/overview) |
+
+See [Authentication → Auth Schemes](/api-reference/authentication#auth-schemes) for the full key-type matrix (Bearer JWT, API Key, X-Service-Key, X-Admin-Key).
+
+## MCP-Specific Errors
+
+When using the Clockchain MCP server (`clockchain.timepointai.com/mcp/`), tool failures surface as MCP error objects rather than HTTP errors:
+
+```json
+{
+  "isError": true,
+  "content": [{"type": "text", "text": "Tool 'flash_render' requires auth"}]
+}
+```
+
+Unauthenticated tools (`clockchain_stats`, `clockchain_search`, `clockchain_moment`, `clockchain_neighbors`) work without credentials. Authenticated tools (`flash_render`, `pro_simulate`) require a JWT passed to the MCP client. See [MCP Server → Tools](/api-reference/mcp#mcp-tools).
+
+## Still Stuck?
+
+- Check the [health endpoints](/api-reference/authentication#health-check) — a 5xx during a known outage is transient.
+- Compare your request against the [Quickstart](/quickstart) — copy-paste, then diff.
+- File an issue at [github.com/timepointai](https://github.com/timepointai).
