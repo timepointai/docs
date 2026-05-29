@@ -1,0 +1,84 @@
+---
+title: Clockchain Pricing & Metering
+description: "How the hosted Clockchain graph is metered — open source, free self-hosting, transparent per-TDF-record billing on the canonical hosted graph."
+---
+
+# Clockchain Pricing & Metering
+
+The Clockchain source code is open. The hosted, continuously-growing canonical graph is the paid product. Billing is metered per TDF record served, and every response carries the headers you need to reconcile your bill against the open TDF specification.
+
+<CardGroup cols={2}>
+  <Card title="Source — Apache-2.0" icon="github" href="https://github.com/timepointai/timepoint-clockchain">
+    `timepointai/timepoint-clockchain` is Apache-2.0 licensed. Clone it and **self-host for free** — no metering, no keys, no limits.
+  </Card>
+  <Card title="Hosted Graph" icon="link" href="https://clockchain.timepointai.com">
+    `clockchain.timepointai.com` serves the canonical graph that keeps growing as Flash renders and the Expander discovers new moments. This is the metered product.
+  </Card>
+</CardGroup>
+
+## What You're Paying For
+
+The code is free. The **data** — a canonical temporal causal graph that grows continuously and is maintained, expanded, and served on your behalf — is what the hosted API meters.
+
+If you don't want to pay, self-host: the Apache-2.0 source builds the same engine. You only forgo the continuously-updated canonical graph and the operational burden of running it.
+
+## Billing Model: Per TDF Record
+
+Billing is **per TDF record served**, not per HTTP request, byte, or token. A request that returns 10 moments is charged for 10 records; a request that returns 1 is charged for 1.
+
+| Tier | Threshold | Charge |
+|------|-----------|--------|
+| Free read tier | Below a configurable monthly record threshold | $0 — no charge |
+| Metered | Above the threshold | Charged per TDF record served |
+
+The free-tier threshold is configurable per account. Reads below it are free, so light and experimental usage costs nothing. Above the threshold, every TDF record served is metered.
+
+Every served object is an **open TDF record** — a content-addressed payload (`tdf_hash`) with [provenance](/products/tdf). There is no proprietary, opaque billing unit: the thing you're billed for is the same open record described in the public [TDF specification](/products/tdf).
+
+## Reconciliation Headers
+
+Every response from the hosted Clockchain carries two headers so you can reconcile your bill against exactly what was served:
+
+| Header | Meaning |
+|--------|---------|
+| `X-TDF-Records` | Number of TDF records served by this response — the billable unit count |
+| `X-Credits-Charged` | Credits charged for this response (0 while within the free read tier) |
+
+```bash
+curl -i "https://clockchain.timepointai.com/api/v1/moments?q=rome&limit=10"
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+X-TDF-Records: 10
+X-Credits-Charged: 0
+```
+
+Sum `X-TDF-Records` across your responses and it will match the record count on your invoice. Because each record is content-addressed by `tdf_hash`, you can also de-duplicate and verify integrity end-to-end.
+
+## Why This Is Transparent
+
+- **Open code** — the engine is Apache-2.0. Inspect exactly how the graph is built and served, or run your own.
+- **Open format** — every billed unit is a public [TDF record](/products/tdf), content-addressed by `tdf_hash` with full provenance. No black-box billing unit.
+- **Visible count** — `X-TDF-Records` and `X-Credits-Charged` on every response let you audit the bill in real time, before the invoice arrives.
+
+## Self-Hosting (Free)
+
+```bash
+git clone https://github.com/timepointai/timepoint-clockchain.git
+cd timepoint-clockchain
+```
+
+Refer to the repository README for local setup. A self-hosted instance is never metered — the free read tier and per-record billing apply only to the hosted canonical graph at `clockchain.timepointai.com`.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Clockchain API" icon="code" href="/api-reference/clockchain">
+    Endpoint reference for the temporal causal graph.
+  </Card>
+  <Card title="TDF" icon="file-code" href="/products/tdf">
+    The open record format every response is billed in.
+  </Card>
+</CardGroup>

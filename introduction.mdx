@@ -18,9 +18,6 @@ Timepoint is an open-source ecosystem of integrated services that work together 
   <Card title="Flash" icon="bolt" href="/products/flash">
     **The Reality Writer** — type any moment in history, get a grounded scene with characters, dialog, and a photorealistic image via a 14-agent critique-loop pipeline.
   </Card>
-  <Card title="Pro" icon="brain" href="/products/pro">
-    **The SNAG Engine** — social simulation with 19 composable mechanisms, 5 temporal modes, causal provenance, and structured social graphs.
-  </Card>
   <Card title="Clockchain" icon="link" href="/products/clockchain">
     **The Temporal Causal Graph** — 1,900+ nodes, 5M+ edges, 700 BCE to 2026. PostgreSQL-backed directed graph that accumulates rendered past and simulated future into a growing Bayesian prior.
   </Card>
@@ -55,7 +52,7 @@ Where **RAG** answers questions from what was written down, **SNAG** reasons abo
 
 {/* WCAG 1.1.1: accessible text description of architecture diagram */}
 
-All client traffic enters through the API Gateway (api.timepointai.com), which handles authentication, credits, and user management. The Gateway proxies generation requests to Flash with an X-User-ID header. Flash produces grounded scenes, drawing on Clockchain (causal graph), Pro (SNAG engine), and SNAG-Bench (benchmark). Billing handles payments and coordinates with Gateway to grant credits. Clockchain and Pro share TDF (data format) as their interchange layer.
+All client traffic enters through the API Gateway (api.timepointai.com), which handles authentication, credits, and user management. The Gateway proxies generation requests to Flash with an X-User-ID header. Flash produces grounded scenes, drawing on Clockchain (causal graph) and SNAG-Bench (benchmark). Billing handles payments and coordinates with Gateway to grant credits. Flash and Clockchain share TDF (data format) as their interchange layer.
 
 ```
                      api.timepointai.com
@@ -71,19 +68,17 @@ All client traffic enters through the API Gateway (api.timepointai.com), which h
                     │   generation engine)│    │   invite codes)  │
                     └─────────▲──────────┘    └────────┬────────┘
                               │                        │
-              ┌───────────────┼───────────────┐        │
-              │               │               │   credits/grant
-     ┌────────┴────────┐ ┌───┴────┐ ┌────────┴────────┐
-     │   Clockchain    │ │  Pro   │ │   SNAG-Bench    │
-     │  (Causal Graph) │ │ (SNAG) │ │  (Benchmark)    │
-     └────────┬────────┘ └───┬────┘ └─────────────────┘
-              │               │
-              └───────┬───────┘
-                      │
-              ┌───────▼───────┐
-              │      TDF      │
-              │ (Data Format) │
-              └───────────────┘
+                    ┌─────────┴───────────┐            │
+                    │                     │       credits/grant
+           ┌────────┴────────┐  ┌─────────┴───────┐
+           │   Clockchain    │  │   SNAG-Bench    │
+           │  (Causal Graph) │  │  (Benchmark)    │
+           └────────┬────────┘  └─────────────────┘
+                    │
+            ┌───────▼───────┐
+            │      TDF      │
+            │ (Data Format) │
+            └───────────────┘
 ```
 
 ## Get Started
@@ -98,7 +93,7 @@ New to Timepoint? These four pages cover the shortest path from zero to a workin
     The four credential types (Bearer JWT, API Key, X-Service-Key, X-Admin-Key) and when to use each.
   </Card>
   <Card title="MCP Tools" icon="plug" href="/api-reference/mcp#mcp-tools">
-    The six MCP tools (`clockchain_stats`, `clockchain_search`, `clockchain_moment`, `clockchain_neighbors`, `flash_render`, `pro_simulate`).
+    The MCP tools (`clockchain_stats`, `clockchain_search`, `clockchain_moment`, `clockchain_neighbors`, `flash_render`).
   </Card>
   <Card title="Errors & Troubleshooting" icon="triangle-exclamation" href="/errors">
     HTTP status codes, rate-limit headers, and a decision tree for common failures.
@@ -112,7 +107,7 @@ New to Timepoint? These four pages cover the shortest path from zero to a workin
     Timepoints, temporal modes, and the Clockchain
   </Card>
   <Card title="API Reference" icon="code" href="/api-reference/overview">
-    Gateway, Flash, Clockchain, and Pro API endpoints
+    Gateway, Flash, and Clockchain API endpoints
   </Card>
   <Card title="GitHub" icon="github" href="https://github.com/timepointai">
     All source code — Apache-2.0 licensed

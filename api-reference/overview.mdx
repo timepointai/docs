@@ -1,6 +1,6 @@
 ---
 title: API Overview
-description: "Overview of the Timepoint AI APIs — Gateway, Flash, Clockchain, Pro, and Billing."
+description: "Overview of the Timepoint AI APIs — Gateway, Flash, Clockchain, and Billing."
 ---
 
 # API Overview
@@ -33,7 +33,6 @@ api.timepointai.com  ──>  API Gateway (auth authority, credits, rate limitin
 | `flash.timepointai.com` | Flash | Internal only, accessed via Gateway | Generation engine |
 | `clockchain.timepointai.com` | Clockchain | None (public reads) / authenticated writes | Temporal causal graph |
 | `clockchain.timepointai.com/mcp/` | Clockchain MCP | MCP tools (public reads) | Streamable HTTP MCP interface (v1.26.0) |
-| `pro.timepointai.com` | Pro Cloud | Gateway JWT or API key | SNAG social simulations |
 | `billing.timepointai.com` | Billing | Internal only | Credit packs, subscriptions, payment verification |
 
 **Consumer apps** (iPhone, web app, external clients) should use `api.timepointai.com` — the gateway authenticates and routes transparently.
