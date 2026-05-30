@@ -52,7 +52,6 @@
         "group": "Products",
         "pages": [
           "products/flash",
-          "products/pro",
           "products/clockchain",
           "products/snag-bench",
           "products/proteus",
@@ -66,8 +65,8 @@
           "api-reference/authentication",
           "api-reference/gateway",
           "api-reference/clockchain",
+          "api-reference/clockchain-pricing",
           "api-reference/flash",
-          "api-reference/pro",
           "api-reference/mcp"
         ]
       }

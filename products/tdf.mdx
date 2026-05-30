@@ -20,9 +20,9 @@ description: "JSON-LD interchange format connecting all Timepoint services. Cont
 
 ```python
 TDFRecord:
-    id: str           # Clockchain canonical URL or Flash/Pro UUID
+    id: str           # Clockchain canonical URL or Flash UUID
     version: str      # "1.0.0"
-    source: str       # "clockchain" | "flash" | "pro" | "proteus" | "snag-bench"
+    source: str       # "clockchain" | "flash" | "proteus" | "snag-bench"
     timestamp: datetime
     provenance: TDFProvenance
         generator: str
@@ -38,16 +38,13 @@ TDFRecord:
 Convert service-specific output to TDF:
 
 ```python
-from timepoint_tdf import from_flash, from_clockchain, from_pro
+from timepoint_tdf import from_flash, from_clockchain
 
 # From Flash scene
 tdf_record = from_flash(flash_output)
 
 # From Clockchain node
 tdf_record = from_clockchain(node_data)
-
-# From Pro simulation
-tdf_record = from_pro(pro_output)
 ```
 
 ## Content Addressing
@@ -70,7 +67,7 @@ Single dependency: `pydantic>=2.0`
 
 {/* WCAG 1.1.1: accessible text description of integration diagram */}
 
-TDF is a pure library at the center. It provides transform functions — `from_flash()`, `from_clockchain()`, `from_pro()`, and a planned Proteus transform — that convert each service's output into the shared TDF format.
+TDF is a pure library at the center. It provides transform functions — `from_flash()`, `from_clockchain()`, and a planned Proteus transform — that convert each service's output into the shared TDF format.
 
 ```
                 ┌──────────────┐
@@ -78,11 +75,11 @@ TDF is a pure library at the center. It provides transform functions — `from_f
                 │  (pure lib)  │
                 └──────┬───────┘
                        │
-          ┌────────────┼────────────┬──────────┐
-          │            │            │          │
-     from_flash() from_clockchain() from_pro() (planned)
-          │            │            │          │
-     ┌────▼───┐  ┌────▼──────┐ ┌──▼───┐ ┌───▼─────┐
-     │ Flash  │  │Clockchain │ │ Pro  │ │Proteus  │
-     └────────┘  └───────────┘ └──────┘ └─────────┘
+          ┌────────────┼─────────────┐
+          │            │             │
+     from_flash() from_clockchain() (planned)
+          │            │             │
+     ┌────▼───┐  ┌────▼──────┐  ┌────▼────┐
+     │ Flash  │  │Clockchain │  │Proteus  │
+     └────────┘  └───────────┘  └─────────┘
 ```

@@ -37,7 +37,7 @@ SNAG synthesizes and maintains structured social graphs to ground LLM generation
 
 ## Temporal Modes
 
-Timepoint Pro supports five temporal reasoning modes:
+Timepoint supports five temporal reasoning modes:
 
 | Mode | Description | Use Case |
 |------|-------------|----------|
@@ -75,7 +75,7 @@ Each edge tightens the Bayesian prior — fewer plausible things *could* have ha
 JSON-LD interchange format connecting all services. Every TDF record includes:
 
 - **id** — canonical URL or service UUID
-- **source** — which service produced it (flash, clockchain, pro, proteus, snag-bench)
+- **source** — which service produced it (flash, clockchain, proteus, snag-bench)
 - **provenance** — generator, run ID, confidence score
 - **payload** — source-specific content
 - **tdf_hash** — SHA-256 of canonicalized payload for content addressing
@@ -96,6 +96,5 @@ The system forms a self-reinforcing loop:
 2. **Flash** renders historical moments into grounded scenes
 3. **Clockchain** stores them as graph nodes with causal edges
 4. **Expander** (LLM) discovers related moments and grows the graph
-5. **Pro** simulates futures from any graph state
-6. **SNAG-Bench** scores quality across all outputs
-7. More data → stronger Bayesian prior → better renderings → more data
+5. **SNAG-Bench** scores quality across all outputs
+6. More data → stronger Bayesian prior → better renderings → more data

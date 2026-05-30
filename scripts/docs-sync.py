@@ -27,7 +27,6 @@ ORG = "timepointai"
 # Map: repo name -> doc files it can touch
 REPO_DOC_MAP = {
     "timepoint-flash": ["api-reference/flash.mdx", "products/flash.mdx"],
-    "timepoint-pro": ["api-reference/pro.mdx", "products/pro.mdx"],
     "timepoint-clockchain": ["api-reference/clockchain.mdx", "products/clockchain.mdx"],
     "proteus": ["products/proteus.mdx"],
     "timepoint-tdf": ["products/tdf.mdx"],

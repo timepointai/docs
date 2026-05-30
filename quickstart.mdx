@@ -92,34 +92,6 @@ curl -X POST http://localhost:8000/api/v1/timepoints/generate/sync \
 
 ---
 
-### Pro — Run a Social Simulation
-
-Pro is the SNAG engine — it simulates social dynamics with causal provenance.
-
-#### Install and Run
-
-```bash
-git clone https://github.com/timepointai/timepoint-pro.git
-cd timepoint-pro
-pip install -e .
-```
-
-Set your LLM provider:
-
-```bash
-export OPENROUTER_API_KEY="your-key-here"
-```
-
-#### Run a Simulation
-
-```bash
-bash run.sh --template board-meeting --fidelity 3
-```
-
-Pro supports 21 verified templates at $0.15–$1.00 per run.
-
----
-
 ### Clockchain — Query the Graph Locally
 
 See the [Hosted API](#hosted-api--the-fastest-path) section above for querying the public Clockchain. To run locally:
